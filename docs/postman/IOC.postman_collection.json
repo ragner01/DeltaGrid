@@ -1,0 +1,55 @@
+{
+  "info": {
+    "name": "IOC Identity & API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Token (client credentials)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+        ],
+        "url": {
+          "raw": "https://localhost:5000/connect/token",
+          "protocol": "https",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["connect","token"]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "client_id", "value": "svc-gateway" },
+            { "key": "client_secret", "value": "secret" },
+            { "key": "grant_type", "value": "client_credentials" },
+            { "key": "scope", "value": "api" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Work Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-tenant-id", "value": "tenant-a" }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/work/orders",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api","v1","work","orders"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Title\",\n  \"description\": \"Desc\",\n  \"siteId\": \"site-1\",\n  \"assetId\": \"asset-1\"\n}"
+        }
+      }
+    }
+  ]
+}

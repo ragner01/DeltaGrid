@@ -1,0 +1,61 @@
+@page "/"
+@using System.Net.Http.Json
+@inject OpsConsole.Services.OpsHubClient Hub
+@inject HttpClient Http
+
+@if (messages.Count > 0)
+{
+    <div>
+        <b>Live:</b> @messages[^1]
+    </div>
+}
+
+<h3>Wells</h3>
+<ul>
+    @if (wells is null)
+    {
+        <li>Loading...</li>
+    }
+    else
+    {
+        @foreach (var w in wells)
+        {
+            <li>
+                <b>@w.name</b>
+                <button @onclick="() => Ack(w.id)">Ack</button>
+                <button @onclick="() => Shelve(w.id)">Shelve</button>
+                <button @onclick="() => CreateWO(w.id)">Create WO</button>
+            </li>
+        }
+    }
+</ul>
+
+<h3>Alarms</h3>
+<ul>
+    @foreach (var a in alarms)
+    {
+        <li>@a</li>
+    }
+</ul>
+
+@code {
+    record Well(Guid id, string name);
+    private List<Well>? wells;
+    private List<string> alarms = new();
+    private List<string> messages = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        wells = new List<Well> { new(Guid.NewGuid(), "Well-1"), new(Guid.NewGuid(), "Well-2") };
+        alarms = new List<string> { "HI PRESSURE W-1", "LOW FLOW W-2" };
+        Hub.OnMessage += s => { messages.Add(s); InvokeAsync(StateHasChanged); };
+        await Hub.StartAsync();
+    }
+
+    private Task Ack(Guid id) => Http.PostAsJsonAsync("/api/v1/ops/ack", id);
+    private Task Shelve(Guid id) => Http.PostAsJsonAsync("/api/v1/ops/shelve", id);
+    private async Task CreateWO(Guid id)
+    {
+        var resp = await Http.PostAsJsonAsync("/api/v1/ops/workorders", id);
+    }
+}

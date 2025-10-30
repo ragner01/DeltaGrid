@@ -1,0 +1,30 @@
+.create-merge table RawTelemetry (TagId:string, Value:real, Quality:string, TsSource:datetime, TsIngested:datetime, Unit:string, Site:string, Asset:string) with (docstring="1s raw telemetry")
+.alter-merge table RawTelemetry policy retention softdelete = 365d
+
+.create-merge table Agg1m (TagId:string, Ts:datetime, Count:long, Min:real, Max:real, Avg:real, P50:real, P90:real, P99:real, Unit:string, Site:string, Asset:string)
+.create-merge table Agg15m (TagId:string, Ts:datetime, Count:long, Min:real, Max:real, Avg:real, P50:real, P90:real, P99:real, Unit:string, Site:string, Asset:string)
+.create-merge table Agg1h (TagId:string, Ts:datetime, Count:long, Min:real, Max:real, Avg:real, P50:real, P90:real, P99:real, Unit:string, Site:string, Asset:string)
+
+// 1s->1m update policy
+.alter table Agg1m policy update @'{
+  "IsEnabled": true,
+  "Source": "RawTelemetry",
+  "Query": "RawTelemetry | summarize Count=count(), Min=min(Value), Max=max(Value), Avg=avg(Value), P50=percentiles(Value,50)[0], P90=percentiles(Value,90)[0], P99=percentiles(Value,99)[0] by TagId, Unit, Site, Asset, bin(TsSource, 1m) | project TagId, Ts=bin_TsSource, Count, Min, Max, Avg, P50, P90, P99, Unit, Site, Asset"
+}'
+
+// 1m->15m update policy
+.alter table Agg15m policy update @'{
+  "IsEnabled": true,
+  "Source": "Agg1m",
+  "Query": "Agg1m | summarize Count=sum(Count), Min=min(Min), Max=max(Max), Avg=avg(Avg), P50=percentiles(Avg,50)[0], P90=percentiles(Avg,90)[0], P99=percentiles(Avg,99)[0] by TagId, Unit, Site, Asset, bin(Ts, 15m) | project TagId, Ts=bin_Ts, Count, Min, Max, Avg, P50, P90, P99, Unit, Site, Asset"
+}'
+
+// 15m->1h update policy
+.alter table Agg1h policy update @'{
+  "IsEnabled": true,
+  "Source": "Agg15m",
+  "Query": "Agg15m | summarize Count=sum(Count), Min=min(Min), Max=max(Max), Avg=avg(Avg), P50=percentiles(Avg,50)[0], P90=percentiles(Avg,90)[0], P99=percentiles(Avg,99)[0] by TagId, Unit, Site, Asset, bin(Ts, 1h) | project TagId, Ts=bin_Ts, Count, Min, Max, Avg, P50, P90, P99, Unit, Site, Asset"
+}'
+
+// RLS by tenant/site using RBAC function
+.create-or-alter function with (folder="security") fn_filter_by_tenant(site:string) { RawTelemetry | where Site == site }

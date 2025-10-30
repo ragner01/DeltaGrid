@@ -1,0 +1,40 @@
+syntax = "proto3";
+package ioc.optimization;
+option csharp_namespace = "IOC.Optimization";
+
+message TelemetryPoint {
+  int64 ts_unix_ms = 1;
+  double pressure_pa = 2;
+  double temperature_c = 3;
+  double flow_m3_s = 4;
+  double choke_pct = 5;
+  double esp_freq_hz = 6;
+}
+
+message Constraints {
+  double min_choke_pct = 1;
+  double max_choke_pct = 2;
+  double min_pressure_pa = 3;
+  double max_pressure_pa = 4;
+  double min_temperature_c = 5;
+  double max_temperature_c = 6;
+}
+
+message OptimizeRequest {
+  string well_id = 1;
+  string lift_method = 2; // "GasLift" | "ESP"
+  repeated TelemetryPoint window = 3;
+  Constraints constraints = 4;
+}
+
+message OptimizeResponse {
+  string well_id = 1;
+  string lift_method = 2;
+  double recommended_choke_pct = 3;
+  double recommended_esp_freq_hz = 4;
+  string rationale = 5;
+}
+
+service Optimizer {
+  rpc Optimize(OptimizeRequest) returns (OptimizeResponse);
+}

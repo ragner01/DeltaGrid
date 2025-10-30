@@ -1,0 +1,11 @@
+- tagId: opc:well1.tubing_pressure
+  unit: Pa
+  deadband: 5000
+- tagId: mqtt:well1.choke_position
+  unit: "%"
+  deadband: 0.5
+- tagId: pi:well1.flow_rate
+  unit: m3/s
+  deadband: 0.05
+  scaleFactor: 1.0
+  scaleOffset: 0.0

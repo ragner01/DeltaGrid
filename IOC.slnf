@@ -1,0 +1,18 @@
+{
+  "solution": {
+    "path": "IOC.sln",
+    "projects": [
+      "src/BuildingBlocks/BuildingBlocks.csproj",
+      "src/Core/Core.Domain.csproj",
+      "src/Application/Application.csproj",
+      "src/Infrastructure/Infrastructure.csproj",
+      "src/WebApi/WebApi.csproj",
+      "src/Gateway/Gateway.csproj",
+      "src/Workers/Workers.Jobs.csproj",
+      "src/Security/Security.csproj",
+      "src/Identity/IdentityProvider.csproj",
+      "tests/UnitTests/UnitTests.csproj",
+      "tests/IntegrationTests/IntegrationTests.csproj"
+    ]
+  }
+}

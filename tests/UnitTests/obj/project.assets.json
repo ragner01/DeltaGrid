@@ -1,0 +1,160 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0": {}
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {
+    "net8.0": [
+      "FluentAssertions >= 6.12.0",
+      "Moq >= 4.20.72",
+      "Roslynator.Analyzers >= 4.11.0",
+      "StyleCop.Analyzers >= 1.2.0-beta.507",
+      "coverlet.collector >= 6.0.0",
+      "xunit >= 2.7.1",
+      "xunit.runner.visualstudio >= 2.5.8"
+    ]
+  },
+  "packageFolders": {
+    "/Users/omotolaalimi/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "0.1.0",
+    "restore": {
+      "projectUniqueName": "/Users/omotolaalimi/Desktop/IOC/tests/UnitTests/UnitTests.csproj",
+      "projectName": "UnitTests",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/tests/UnitTests/UnitTests.csproj",
+      "packagesPath": "/Users/omotolaalimi/.nuget/packages/",
+      "outputPath": "/Users/omotolaalimi/Desktop/IOC/tests/UnitTests/obj/",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "/Users/omotolaalimi/Desktop/IOC/NuGet.Config",
+        "/Users/omotolaalimi/.nuget/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0"
+      ],
+      "sources": {
+        "/usr/local/share/dotnet/library-packs": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "projectReferences": {
+            "/Users/omotolaalimi/Desktop/IOC/src/Application/Application.csproj": {
+              "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Application/Application.csproj"
+            },
+            "/Users/omotolaalimi/Desktop/IOC/src/BuildingBlocks/BuildingBlocks.csproj": {
+              "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/BuildingBlocks/BuildingBlocks.csproj"
+            },
+            "/Users/omotolaalimi/Desktop/IOC/src/Core/Core.Domain.csproj": {
+              "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Core/Core.Domain.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "allWarningsAsErrors": true,
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net8.0": {
+        "targetAlias": "net8.0",
+        "dependencies": {
+          "FluentAssertions": {
+            "target": "Package",
+            "version": "[6.12.0, )"
+          },
+          "Moq": {
+            "target": "Package",
+            "version": "[4.20.72, )"
+          },
+          "Roslynator.Analyzers": {
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[4.11.0, )"
+          },
+          "StyleCop.Analyzers": {
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[1.2.0-beta.507, )"
+          },
+          "coverlet.collector": {
+            "target": "Package",
+            "version": "[6.0.0, )"
+          },
+          "xunit": {
+            "target": "Package",
+            "version": "[2.7.1, )"
+          },
+          "xunit.runner.visualstudio": {
+            "target": "Package",
+            "version": "[2.5.8, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.20, 8.0.20]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.20, 8.0.20]"
+          }
+        ],
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  },
+  "logs": [
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "libraryId": "Moq"
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "libraryId": "xunit"
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "libraryId": "xunit.runner.visualstudio"
+    },
+    {
+      "code": "NU1900",
+      "level": "Error",
+      "message": "Warning As Error: Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json."
+    }
+  ]
+}

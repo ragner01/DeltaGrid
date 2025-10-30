@@ -1,0 +1,63 @@
+{
+  "version": 2,
+  "dgSpecHash": "XuQf9IRexjo=",
+  "success": false,
+  "projectFilePath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+  "expectedPackageFiles": [],
+  "logs": [
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "filePath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "libraryId": "Azure.Messaging.EventHubs",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "filePath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "libraryId": "Azure.Messaging.EventHubs.Producer",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "filePath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "libraryId": "Microsoft.Extensions.Configuration.Binder",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "filePath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "libraryId": "System.Reactive",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "filePath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "libraryId": "OPCFoundation.NetStandard.Opc.Ua",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "filePath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+      "libraryId": "MQTTnet",
+      "targetGraphs": []
+    }
+  ]
+}

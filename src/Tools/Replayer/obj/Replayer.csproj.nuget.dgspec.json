@@ -1,0 +1,389 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj": {}
+  },
+  "projects": {
+    "/Users/omotolaalimi/Desktop/IOC/src/BuildingBlocks/BuildingBlocks.csproj": {
+      "version": "0.1.0",
+      "restore": {
+        "projectUniqueName": "/Users/omotolaalimi/Desktop/IOC/src/BuildingBlocks/BuildingBlocks.csproj",
+        "projectName": "BuildingBlocks",
+        "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/BuildingBlocks/BuildingBlocks.csproj",
+        "packagesPath": "/Users/omotolaalimi/.nuget/packages/",
+        "outputPath": "/Users/omotolaalimi/Desktop/IOC/src/BuildingBlocks/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/omotolaalimi/Desktop/IOC/NuGet.Config",
+          "/Users/omotolaalimi/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "allWarningsAsErrors": true,
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Roslynator.Analyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[4.11.0, )"
+            },
+            "StyleCop.Analyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.2.0-beta.507, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.20, 8.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.20, 8.0.20]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/omotolaalimi/Desktop/IOC/src/Ingestion/Ingestion.Worker.csproj": {
+      "version": "0.1.0",
+      "restore": {
+        "projectUniqueName": "/Users/omotolaalimi/Desktop/IOC/src/Ingestion/Ingestion.Worker.csproj",
+        "projectName": "Ingestion.Worker",
+        "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Ingestion/Ingestion.Worker.csproj",
+        "packagesPath": "/Users/omotolaalimi/.nuget/packages/",
+        "outputPath": "/Users/omotolaalimi/Desktop/IOC/src/Ingestion/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/omotolaalimi/Desktop/IOC/NuGet.Config",
+          "/Users/omotolaalimi/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/Users/omotolaalimi/Desktop/IOC/src/BuildingBlocks/BuildingBlocks.csproj": {
+                "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/BuildingBlocks/BuildingBlocks.csproj"
+              },
+              "/Users/omotolaalimi/Desktop/IOC/src/Security/Security.csproj": {
+                "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Security/Security.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "allWarningsAsErrors": true,
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Azure.Messaging.EventHubs": {
+              "target": "Package",
+              "version": "[5.11.3, )"
+            },
+            "Azure.Messaging.EventHubs.Producer": {
+              "target": "Package",
+              "version": "[5.11.3, )"
+            },
+            "MQTTnet": {
+              "target": "Package",
+              "version": "[4.3.2.952, )"
+            },
+            "Microsoft.Extensions.Configuration.Binder": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "OPCFoundation.NetStandard.Opc.Ua": {
+              "target": "Package",
+              "version": "[1.5.374, )"
+            },
+            "OpenTelemetry.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[1.8.1, )"
+            },
+            "Roslynator.Analyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[4.11.0, )"
+            },
+            "Serilog.AspNetCore": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "StyleCop.Analyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.2.0-beta.507, )"
+            },
+            "System.Reactive": {
+              "target": "Package",
+              "version": "[6.0.0, )"
+            },
+            "YamlDotNet": {
+              "target": "Package",
+              "version": "[15.3.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.20, 8.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.osx-arm64",
+              "version": "[8.0.20, 8.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.20, 8.0.20]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/omotolaalimi/Desktop/IOC/src/Security/Security.csproj": {
+      "version": "0.1.0",
+      "restore": {
+        "projectUniqueName": "/Users/omotolaalimi/Desktop/IOC/src/Security/Security.csproj",
+        "projectName": "Security",
+        "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Security/Security.csproj",
+        "packagesPath": "/Users/omotolaalimi/.nuget/packages/",
+        "outputPath": "/Users/omotolaalimi/Desktop/IOC/src/Security/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/omotolaalimi/Desktop/IOC/NuGet.Config",
+          "/Users/omotolaalimi/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "allWarningsAsErrors": true,
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Authorization": {
+              "target": "Package",
+              "version": "[8.0.5, )"
+            },
+            "Roslynator.Analyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[4.11.0, )"
+            },
+            "StyleCop.Analyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.2.0-beta.507, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.20, 8.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.20, 8.0.20]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj": {
+      "version": "0.1.0",
+      "restore": {
+        "projectUniqueName": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+        "projectName": "Replayer",
+        "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/Replayer.csproj",
+        "packagesPath": "/Users/omotolaalimi/.nuget/packages/",
+        "outputPath": "/Users/omotolaalimi/Desktop/IOC/src/Tools/Replayer/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/omotolaalimi/Desktop/IOC/NuGet.Config",
+          "/Users/omotolaalimi/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "/Users/omotolaalimi/Desktop/IOC/src/Ingestion/Ingestion.Worker.csproj": {
+                "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Ingestion/Ingestion.Worker.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "allWarningsAsErrors": true,
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Roslynator.Analyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[4.11.0, )"
+            },
+            "StyleCop.Analyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.2.0-beta.507, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

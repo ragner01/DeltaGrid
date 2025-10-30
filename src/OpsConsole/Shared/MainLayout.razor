@@ -1,0 +1,16 @@
+@inherits LayoutComponentBase
+
+<div class="app @(dark ? "dark" : "")">
+    <header>
+        <h1>Operations Console</h1>
+        <button @onclick="ToggleDark">@(dark ? "Light" : "Dark")</button>
+    </header>
+    <div class="body">
+        @Body
+    </div>
+</div>
+
+@code {
+    private bool dark;
+    private void ToggleDark() => dark = !dark;
+}

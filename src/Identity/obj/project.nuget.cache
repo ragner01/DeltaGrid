@@ -1,0 +1,48 @@
+{
+  "version": 2,
+  "dgSpecHash": "azQgNzQ6YAo=",
+  "success": false,
+  "projectFilePath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+  "expectedPackageFiles": [
+    "/Users/omotolaalimi/.nuget/packages/microsoft.netcore.app.ref/8.0.20/microsoft.netcore.app.ref.8.0.20.nupkg.sha512",
+    "/Users/omotolaalimi/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.20/microsoft.aspnetcore.app.ref.8.0.20.nupkg.sha512",
+    "/Users/omotolaalimi/.nuget/packages/microsoft.netcore.app.host.osx-arm64/8.0.20/microsoft.netcore.app.host.osx-arm64.8.0.20.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+      "filePath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+      "libraryId": "Microsoft.EntityFrameworkCore.InMemory",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+      "filePath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+      "libraryId": "Microsoft.AspNetCore.Identity.EntityFrameworkCore",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+      "filePath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+      "libraryId": "Duende.IdentityServer",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1900",
+      "level": "Error",
+      "message": "Warning As Error: Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json.",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+      "filePath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+      "targetGraphs": []
+    }
+  ]
+}

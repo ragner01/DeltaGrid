@@ -1,0 +1,152 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0": {}
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {
+    "net8.0": [
+      "Duende.IdentityServer >= 7.0.5",
+      "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 8.0.5",
+      "Microsoft.EntityFrameworkCore.InMemory >= 8.0.5",
+      "Roslynator.Analyzers >= 4.11.0",
+      "Serilog.AspNetCore >= 8.0.1",
+      "StyleCop.Analyzers >= 1.2.0-beta.507"
+    ]
+  },
+  "packageFolders": {
+    "/Users/omotolaalimi/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "0.1.0",
+    "restore": {
+      "projectUniqueName": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+      "projectName": "IdentityProvider",
+      "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/IdentityProvider.csproj",
+      "packagesPath": "/Users/omotolaalimi/.nuget/packages/",
+      "outputPath": "/Users/omotolaalimi/Desktop/IOC/src/Identity/obj/",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "/Users/omotolaalimi/Desktop/IOC/NuGet.Config",
+        "/Users/omotolaalimi/.nuget/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0"
+      ],
+      "sources": {
+        "/usr/local/share/dotnet/library-packs": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "allWarningsAsErrors": true,
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net8.0": {
+        "targetAlias": "net8.0",
+        "dependencies": {
+          "Duende.IdentityServer": {
+            "target": "Package",
+            "version": "[7.0.5, )"
+          },
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+            "target": "Package",
+            "version": "[8.0.5, )"
+          },
+          "Microsoft.EntityFrameworkCore.InMemory": {
+            "target": "Package",
+            "version": "[8.0.5, )"
+          },
+          "Roslynator.Analyzers": {
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[4.11.0, )"
+          },
+          "Serilog.AspNetCore": {
+            "target": "Package",
+            "version": "[8.0.1, )"
+          },
+          "StyleCop.Analyzers": {
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[1.2.0-beta.507, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.20, 8.0.20]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.osx-arm64",
+            "version": "[8.0.20, 8.0.20]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.20, 8.0.20]"
+          }
+        ],
+        "frameworkReferences": {
+          "Microsoft.AspNetCore.App": {
+            "privateAssets": "none"
+          },
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  },
+  "logs": [
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "libraryId": "Microsoft.EntityFrameworkCore.InMemory"
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "libraryId": "Microsoft.AspNetCore.Identity.EntityFrameworkCore"
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\n  The type initializer for 'System.Net.CookieContainer' threw an exception.\n  GetDomainName: -1",
+      "libraryId": "Duende.IdentityServer"
+    },
+    {
+      "code": "NU1900",
+      "level": "Error",
+      "message": "Warning As Error: Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json."
+    }
+  ]
+}

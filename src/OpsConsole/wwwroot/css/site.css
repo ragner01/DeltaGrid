@@ -1,0 +1,6 @@
+:root{--bg:#ffffff;--fg:#111;}
+.dark{--bg:#0f172a;--fg:#e5e7eb;}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #ccc}
+.body{padding:16px}
+button{margin-left:8px}
