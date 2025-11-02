@@ -1,6 +1,7 @@
 namespace IOC.Core.Domain.Lab;
 
 using IOC.BuildingBlocks;
+using IOC.Core.Domain.Base;
 
 public sealed class Sample : Entity
 {

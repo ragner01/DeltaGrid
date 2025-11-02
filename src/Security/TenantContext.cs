@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace IOC.Security;
 
@@ -34,9 +36,13 @@ public sealed class TenantContextAccessor : ITenantContextAccessor
 
 public static class TenantContextExtensions
 {
+    /// <summary>
+    /// Add tenant context services. Note: Caller must call AddHttpContextAccessor() separately.
+    /// </summary>
     public static IServiceCollection AddTenantContext(this IServiceCollection services)
     {
-        services.AddHttpContextAccessor();
+        // Note: AddHttpContextAccessor() must be called by the consuming application
+        // services.AddHttpContextAccessor();
         services.AddScoped<ITenantContextAccessor, TenantContextAccessor>();
         return services;
     }

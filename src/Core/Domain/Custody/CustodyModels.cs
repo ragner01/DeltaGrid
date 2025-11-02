@@ -1,6 +1,7 @@
 namespace IOC.Core.Domain.Custody;
 
 using IOC.BuildingBlocks;
+using IOC.Core.Domain.Base;
 
 public sealed class FiscalMeter : Entity
 {
