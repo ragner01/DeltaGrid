@@ -124,7 +124,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=D3lt@Gr1d!2024
+      - SA_PASSWORD=${SQL_SERVER_PASSWORD:-ChangeMe123!}
       - MSSQL_PID=Developer
     ports:
       - "1433:1433"
@@ -144,7 +144,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=D3lt@Gr1d!2024
+      - SA_PASSWORD=${SQL_SERVER_PASSWORD:-ChangeMe123!}
       - MSSQL_PID=Developer
     ports:
       - "1434:1433"
