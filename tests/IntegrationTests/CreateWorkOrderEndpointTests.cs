@@ -8,11 +8,11 @@ using Xunit;
 
 namespace IOC.IntegrationTests;
 
-public class CreateWorkOrderEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+public class CreateWorkOrderEndpointTests : IClassFixture<WebApplicationFactory<global::Program>>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly WebApplicationFactory<global::Program> _factory;
 
-    public CreateWorkOrderEndpointTests(WebApplicationFactory<Program> factory)
+    public CreateWorkOrderEndpointTests(WebApplicationFactory<global::Program> factory)
     {
         _factory = factory.WithWebHostBuilder(_ => { });
     }

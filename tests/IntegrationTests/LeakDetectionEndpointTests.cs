@@ -8,11 +8,11 @@ using Xunit;
 
 namespace IOC.IntegrationTests;
 
-public class LeakDetectionEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+public class LeakDetectionEndpointTests : IClassFixture<WebApplicationFactory<global::Program>>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly WebApplicationFactory<global::Program> _factory;
 
-    public LeakDetectionEndpointTests(WebApplicationFactory<Program> factory)
+    public LeakDetectionEndpointTests(WebApplicationFactory<global::Program> factory)
     {
         _factory = factory.WithWebHostBuilder(_ => { });
     }
