@@ -23,13 +23,15 @@ jobs:
         run: dotnet restore IOC.sln
       
       - name: Build solution
-        run: dotnet build IOC.sln -c Release --no-restore --verbosity normal
+        run: dotnet build IOC.sln -c Release --no-restore --verbosity minimal
       
       - name: Run unit tests
+        id: unit-tests
         continue-on-error: true
         run: dotnet test tests/UnitTests/UnitTests.csproj -c Release --no-build --logger "trx;LogFileName=unit-test-results.trx" --verbosity normal --collect:"XPlat Code Coverage"
       
       - name: Run integration tests
+        id: integration-tests
         continue-on-error: true
         run: dotnet test tests/IntegrationTests/IntegrationTests.csproj -c Release --no-build --logger "trx;LogFileName=integration-test-results.trx" --verbosity normal --collect:"XPlat Code Coverage"
       
@@ -49,3 +51,13 @@ jobs:
           name: code-coverage
           path: '**/coverage.cobertura.xml'
           retention-days: 30
+      
+      - name: Fail if tests failed
+        if: always()
+        run: |
+          if [ "${{ steps.unit-tests.outcome }}" == "failure" ] || [ "${{ steps.integration-tests.outcome }}" == "failure" ]; then
+            echo "❌ Tests failed - check test-results artifact for details"
+            exit 1
+          else
+            echo "✅ All tests passed"
+          fi
