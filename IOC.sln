@@ -35,6 +35,24 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Optimization.Service", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Events.Service", "src/Events/Events.Service.csproj", "{ABCDEFAB-1234-5678-9ABC-ABCDEFFEDCBA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Search.Service", "src/Search/Search.Service.csproj", "{SEARCH01-SEARCH-SEARCH-SEARCH-SEARCHSEARCH}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reporting.Service", "src/Reporting/Reporting.Service.csproj", "{REPORT01-REPORT-REPORT-REPORT-REPORTREPORT}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migrations", "src/Migrations/Migrations.csproj", "{MIGRATE01-MIGRATE-MIGRATE-MIGRATE-MIGRATEMIGRATE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DisasterRecovery.Service", "src/DisasterRecovery/DisasterRecovery.Service.csproj", "{DR0001-DR-DR-DR-DRDRDRDR}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataGovernance.Service", "src/DataGovernance/DataGovernance.Service.csproj", "{DG0001-DG-DG-DG-DGDGDGDG}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cutover.Service", "src/Cutover/Cutover.Service.csproj", "{CV0001-CV-CV-CV-CVCVCVCV}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Emissions.Service", "src/Emissions/Emissions.Service.csproj", "{EM0001-EM-EM-EM-EMEMEMEM}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MDM.Service", "src/MDM/MDM.Service.csproj", "{MD0001-MD-MD-MD-MDMDMDMD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cost.Service", "src/Cost/Cost.Service.csproj", "{CO0001-CO-CO-CO-COCOCOCO}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,5 +123,41 @@ Global
 		{ABCDEFAB-1234-5678-9ABC-ABCDEFFEDCBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABCDEFAB-1234-5678-9ABC-ABCDEFFEDCBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABCDEFAB-1234-5678-9ABC-ABCDEFFEDCBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{SEARCH01-SEARCH-SEARCH-SEARCH-SEARCHSEARCH}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{SEARCH01-SEARCH-SEARCH-SEARCH-SEARCHSEARCH}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{SEARCH01-SEARCH-SEARCH-SEARCH-SEARCHSEARCH}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{SEARCH01-SEARCH-SEARCH-SEARCH-SEARCHSEARCH}.Release|Any CPU.Build.0 = Release|Any CPU
+		{REPORT01-REPORT-REPORT-REPORT-REPORTREPORT}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{REPORT01-REPORT-REPORT-REPORT-REPORTREPORT}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{REPORT01-REPORT-REPORT-REPORT-REPORTREPORT}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{REPORT01-REPORT-REPORT-REPORT-REPORTREPORT}.Release|Any CPU.Build.0 = Release|Any CPU
+		{MIGRATE01-MIGRATE-MIGRATE-MIGRATE-MIGRATEMIGRATE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{MIGRATE01-MIGRATE-MIGRATE-MIGRATE-MIGRATEMIGRATE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{MIGRATE01-MIGRATE-MIGRATE-MIGRATE-MIGRATEMIGRATE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{MIGRATE01-MIGRATE-MIGRATE-MIGRATE-MIGRATEMIGRATE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DR0001-DR-DR-DR-DRDRDRDR}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DR0001-DR-DR-DR-DRDRDRDR}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DR0001-DR-DR-DR-DRDRDRDR}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DR0001-DR-DR-DR-DRDRDRDR}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DG0001-DG-DG-DG-DGDGDGDG}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DG0001-DG-DG-DG-DGDGDGDG}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DG0001-DG-DG-DG-DGDGDGDG}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DG0001-DG-DG-DG-DGDGDGDG}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CV0001-CV-CV-CV-CVCVCVCV}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CV0001-CV-CV-CV-CVCVCVCV}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CV0001-CV-CV-CV-CVCVCVCV}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CV0001-CV-CV-CV-CVCVCVCV}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EM0001-EM-EM-EM-EMEMEMEM}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EM0001-EM-EM-EM-EMEMEMEM}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EM0001-EM-EM-EM-EMEMEMEM}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EM0001-EM-EM-EM-EMEMEMEM}.Release|Any CPU.Build.0 = Release|Any CPU
+		{MD0001-MD-MD-MD-MDMDMDMD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{MD0001-MD-MD-MD-MDMDMDMD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{MD0001-MD-MD-MD-MDMDMDMD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{MD0001-MD-MD-MD-MDMDMDMD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CO0001-CO-CO-CO-COCOCOCO}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CO0001-CO-CO-CO-COCOCOCO}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CO0001-CO-CO-CO-COCOCOCO}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CO0001-CO-CO-CO-COCOCOCO}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

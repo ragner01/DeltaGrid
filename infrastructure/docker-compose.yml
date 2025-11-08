@@ -1,0 +1,186 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: infrastructure/Dockerfile.api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      - sqlserver
+      - redis
+    networks:
+      - deltagrid-network
+
+  gateway:
+    build:
+      context: .
+      dockerfile: infrastructure/Dockerfile.gateway
+    ports:
+      - "8081:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      - api
+    networks:
+      - deltagrid-network
+
+  identity:
+    build:
+      context: .
+      dockerfile: infrastructure/Dockerfile.identity
+    ports:
+      - "8082:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      - sqlserver
+    networks:
+      - deltagrid-network
+
+  ops-console:
+    build:
+      context: .
+      dockerfile: infrastructure/Dockerfile.ops-console
+    ports:
+      - "8083:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      - api
+    networks:
+      - deltagrid-network
+
+  ingestion:
+    build:
+      context: .
+      dockerfile: infrastructure/Dockerfile.ingestion
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - eventhubs
+    networks:
+      - deltagrid-network
+
+  optimization:
+    build:
+      context: .
+      dockerfile: infrastructure/Dockerfile.optimization
+    ports:
+      - "8084:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - deltagrid-network
+
+  events:
+    build:
+      context: .
+      dockerfile: infrastructure/Dockerfile.events
+    ports:
+      - "8085:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - deltagrid-network
+
+  search:
+    build:
+      context: .
+      dockerfile: infrastructure/Dockerfile.search
+    ports:
+      - "8086:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - deltagrid-network
+
+  reporting:
+    build:
+      context: .
+      dockerfile: infrastructure/Dockerfile.reporting
+    ports:
+      - "8087:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      - sqlserver
+      - hangfire-db
+    networks:
+      - deltagrid-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=D3lt@Gr1d!2024
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - deltagrid-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - deltagrid-network
+
+  hangfire-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=D3lt@Gr1d!2024
+      - MSSQL_PID=Developer
+    ports:
+      - "1434:1433"
+    volumes:
+      - hangfire-data:/var/opt/mssql
+    networks:
+      - deltagrid-network
+
+  eventhubs:
+    image: apache/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+    depends_on:
+      - zookeeper
+    networks:
+      - deltagrid-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+    networks:
+      - deltagrid-network
+
+volumes:
+  sqlserver-data:
+  hangfire-data:
+
+networks:
+  deltagrid-network:
+    driver: bridge
+
+

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using IOC.Ingestion;
+using Microsoft.Extensions.Hosting;
 
 if (args.Length < 1)
 {

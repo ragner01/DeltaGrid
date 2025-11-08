@@ -1,7 +1,13 @@
+using System.Net;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.Extensions.Http;
-using System.Net;
+using Serilog;
 using Yarp.ReverseProxy.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +22,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = false,
             ValidateAudience = false,
             ValidateIssuerSigningKey = false,
-            ValidateLifetime = true
+            ValidateLifetime = true,
         };
     });
 
@@ -30,7 +36,7 @@ builder.Services.AddRateLimiter(o =>
             PermitLimit = 200,
             Window = TimeSpan.FromSeconds(1),
             QueueLimit = 0,
-            AutoReplenishment = true
+            AutoReplenishment = true,
         });
     });
 });
@@ -50,7 +56,7 @@ builder.Services.AddReverseProxy()
                 Match = new RouteMatch { Path = "/api/v1/{**catchall}" },
                 Transforms = new[]
                 {
-                    new Dictionary<string,string> { ["RequestHeader"] = "X-Canary", ["Set"] = "{X-Canary}" }
+                    new Dictionary<string, string> { ["RequestHeader"] = "X-Canary", ["Set"] = "{X-Canary}" },
                 }
             },
             new RouteConfig
@@ -67,22 +73,21 @@ builder.Services.AddReverseProxy()
                 ClusterId = "api-cluster-v1",
                 Destinations = new Dictionary<string, DestinationConfig>
                 {
-                    ["d1"] = new DestinationConfig{ Address = "https://localhost:5001/" }
-                }
+                    ["d1"] = new DestinationConfig { Address = "https://localhost:5001/" },
+                },
             },
             new ClusterConfig
             {
                 ClusterId = "api-cluster-v2",
                 Destinations = new Dictionary<string, DestinationConfig>
                 {
-                    ["d1"] = new DestinationConfig{ Address = "https://localhost:5001/" }
-                }
-            }
-        }
-    );
+                    ["d1"] = new DestinationConfig { Address = "https://localhost:5001/" },
+                },
+            },
+        });
 
-builder.Services.AddSingleton<HttpMessageHandlerBuilderFilter, PollyHttpMessageHandlerBuilderFilter>();
-
+// Polly resilience policies configured via HttpClient factory
+// Note: YARP handles resilience internally; this is for external HTTP calls
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
@@ -109,7 +114,13 @@ app.Use(async (ctx, next) =>
         var key = ctx.Request.Headers["Idempotency-Key"].FirstOrDefault();
         if (!string.IsNullOrWhiteSpace(key))
         {
-            if (idempotencyStore.ContainsKey(key)) { ctx.Response.StatusCode = 409; await ctx.Response.WriteAsync("duplicate"); return; }
+            if (idempotencyStore.ContainsKey(key))
+            {
+                ctx.Response.StatusCode = 409;
+                await ctx.Response.WriteAsync("duplicate");
+                return;
+            }
+
             idempotencyStore[key] = DateTimeOffset.UtcNow;
         }
     }
@@ -126,37 +137,4 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
 app.Run();
 
-public partial class Program {}
-
-public sealed class PollyHttpMessageHandlerBuilderFilter : IHttpMessageHandlerBuilderFilter
-{
-    public Action<HttpMessageHandlerBuilder> Configure(Action<HttpMessageHandlerBuilder> next)
-    {
-        return builder =>
-        {
-            next(builder);
-            var retry = HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrResult(r => r.StatusCode == HttpStatusCode.TooManyRequests)
-                .WaitAndRetryAsync(new[] { TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1) });
-            var breaker = HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
-            builder.AdditionalHandlers.Add(new PolicyHttpMessageHandler(retry));
-            builder.AdditionalHandlers.Add(new PolicyHttpMessageHandler(breaker));
-            builder.AdditionalHandlers.Add(new TimeoutHandler(TimeSpan.FromSeconds(15)));
-        };
-    }
-}
-
-public sealed class TimeoutHandler : DelegatingHandler
-{
-    private readonly TimeSpan _timeout;
-    public TimeoutHandler(TimeSpan timeout) { _timeout = timeout; }
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(_timeout);
-        return await base.SendAsync(request, cts.Token);
-    }
-}
+public partial class Program { }

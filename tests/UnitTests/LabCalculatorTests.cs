@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
 using IOC.Application.Lab;
 using IOC.Core.Domain.Lab;
@@ -25,8 +22,8 @@ public class LabCalculatorTests
     public async Task Recording_New_Result_Closes_Prior_Validity()
     {
         var repo = new InMemoryLabRepository();
-        var sink = new NoOpLabPropertySink(new Microsoft.Extensions.Logging.Abstractions.NullLogger<NoOpLabPropertySink>());
-        var handlers = new Commands.Handlers(repo, sink);
+        var sink = new TestLabPropertySink();
+        var handlers = new Commands.Handlers(repo, sink, new TestPdfSigner());
 
         var sampleId = "S-1";
         await handlers.Handle(new Commands.PlanSampleCommand(sampleId, "W-1", DateTimeOffset.UtcNow, "BAR-1"), CancellationToken.None);
@@ -41,4 +38,15 @@ public class LabCalculatorTests
         second.Should().NotBeNull();
         second!.MethodVersion.Should().Be("ASTM-Dxxx v2");
     }
+}
+
+file sealed class TestLabPropertySink : ILabPropertySink
+{
+    public Task PushToAllocationAsync(string sourceId, double? api, double? gor, double? wc, CancellationToken ct) => Task.CompletedTask;
+    public Task PushToOptimizationAsync(string sourceId, double? api, double? gor, double? viscosity, CancellationToken ct) => Task.CompletedTask;
+}
+
+file sealed class TestPdfSigner : IPdfSigner
+{
+    public (string Algo, string Signature) Sign(string certificateUrl) => ("none", $"sig::{certificateUrl}");
 }

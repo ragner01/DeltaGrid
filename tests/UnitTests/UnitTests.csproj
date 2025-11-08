@@ -3,6 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.7.1" />
@@ -15,5 +16,9 @@
     <ProjectReference Include="../../src/Application/Application.csproj" />
     <ProjectReference Include="../../src/Core/Core.Domain.csproj" />
     <ProjectReference Include="../../src/BuildingBlocks/BuildingBlocks.csproj" />
+    <ProjectReference Include="../../src/Infrastructure/Infrastructure.csproj" />
+    <ProjectReference Include="../../src/Reporting/Reporting.Service.csproj" />
+    <ProjectReference Include="../../src/Security/Security.csproj" />
+    <ProjectReference Include="../../src/Search/Search.Service.csproj" />
   </ItemGroup>
 </Project>

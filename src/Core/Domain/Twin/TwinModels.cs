@@ -1,6 +1,7 @@
 namespace IOC.Core.Domain.Twin;
 
 using IOC.BuildingBlocks;
+using IOC.Core.Domain.Base;
 
 public enum TwinLevel
 {

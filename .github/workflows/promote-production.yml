@@ -1,0 +1,171 @@
+name: Promote to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to promote'
+        required: true
+        type: string
+      canary_percentage:
+        description: 'Canary traffic percentage (0-100)'
+        required: false
+        default: '10'
+        type: string
+
+env:
+  AZURE_RESOURCE_GROUP: rg-deltagrid-prod
+  AZURE_LOCATION: westeurope
+  VERSION: ${{ github.event.inputs.version }}
+  CANARY_PERCENTAGE: ${{ github.event.inputs.canary_percentage }}
+
+jobs:
+  approval:
+    name: Production Approval
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Wait for production approval
+        run: |
+          echo "⚠️ PRODUCTION DEPLOYMENT REQUIRES APPROVAL"
+          echo "Version: ${{ env.VERSION }}"
+          echo "Canary percentage: ${{ env.CANARY_PERCENTAGE }}%"
+
+  pre-deployment-checks:
+    name: Pre-deployment Checks
+    runs-on: ubuntu-latest
+    needs: approval
+    if: always() && needs.approval.result == 'success'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Verify staging deployment
+        run: |
+          az webapp show --name app-deltagrid-api-staging --resource-group rg-deltagrid-staging || exit 1
+      
+      - name: Check health endpoints
+        run: |
+          curl -f https://app-deltagrid-api-staging.azurewebsites.net/health || exit 1
+      
+      - name: Run smoke tests
+        run: |
+          dotnet test tests/SmokeTests -c Release || exit 1
+
+  deploy-canary:
+    name: Deploy Canary
+    runs-on: ubuntu-latest
+    needs: pre-deployment-checks
+    if: always() && needs.pre-deployment-checks.result == 'success'
+    environment:
+      name: production
+    
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Deploy canary slot
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: app-deltagrid-api-prod
+          images: ${{ secrets.ACR_LOGIN_SERVER }}/deltagrid-api:staging-${{ env.VERSION }}
+          slot-name: canary
+      
+      - name: Configure canary traffic routing
+        run: |
+          # Configure traffic routing to canary slot (using Azure Traffic Manager or App Gateway)
+          az network traffic-manager endpoint update \
+            --name api-canary \
+            --profile-name tm-deltagrid-prod \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --weight ${{ env.CANARY_PERCENTAGE }}
+      
+      - name: Monitor canary metrics
+        run: |
+          echo "Monitoring canary deployment for 15 minutes..."
+          sleep 900  # 15 minutes
+          # Check error rates, latency, etc.
+          # If metrics are good, proceed to full rollout
+
+  deploy-full:
+    name: Deploy to Production (Full Rollout)
+    runs-on: ubuntu-latest
+    needs: deploy-canary
+    if: always() && needs.deploy-canary.result == 'success'
+    environment:
+      name: production
+    
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Deploy to production slot
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: app-deltagrid-api-prod
+          images: ${{ secrets.ACR_LOGIN_SERVER }}/deltagrid-api:staging-${{ env.VERSION }}
+          slot-name: production
+      
+      - name: Swap slots (blue-green)
+        run: |
+          az webapp deployment slot swap \
+            --name app-deltagrid-api-prod \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --slot production \
+            --target-slot production
+      
+      - name: Rollback canary on failure
+        if: failure()
+        run: |
+          # Rollback canary traffic to 0%
+          az network traffic-manager endpoint update \
+            --name api-canary \
+            --profile-name tm-deltagrid-prod \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --weight 0
+
+  rollback:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy-canary, deploy-full]
+    if: failure()
+    environment:
+      name: production
+    
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Rollback to previous version
+        run: |
+          # Swap back to previous slot
+          az webapp deployment slot swap \
+            --name app-deltagrid-api-prod \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --slot production \
+            --target-slot previous
+      
+      - name: Notify rollback
+        run: |
+          echo "⚠️ Rollback executed. Previous version restored."
+

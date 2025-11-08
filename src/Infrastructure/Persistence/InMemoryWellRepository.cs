@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using IOC.Application.Common.Outbox;
-using IOC.Application.Well.AdjustChoke;
+using IOC.Application.Well;
 using IOC.Core.Domain.Well;
 
 namespace IOC.Infrastructure.Persistence;

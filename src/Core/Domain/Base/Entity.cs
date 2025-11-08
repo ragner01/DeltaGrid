@@ -2,7 +2,17 @@ namespace IOC.Core.Domain.Base;
 
 public abstract class Entity
 {
-    public Guid Id { get; protected set; } = Guid.NewGuid();
+    public Guid Id { get; protected set; }
+
+    protected Entity()
+    {
+        Id = Guid.NewGuid();
+    }
+
+    protected Entity(Guid id)
+    {
+        Id = id;
+    }
 }
 
 public abstract class AggregateRoot : Entity

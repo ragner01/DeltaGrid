@@ -1,0 +1,98 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+
+jobs:
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run secret scanning
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+
+  dependency-scanning:
+    name: Dependency Scanning (SCA)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.305'
+      
+      - name: Restore dependencies
+        run: dotnet restore
+      
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'DeltaGrid'
+          path: '.'
+          format: 'HTML'
+          args: >
+            --enableRetired
+            --failOnCVSS 7
+      
+      - name: Upload dependency scan results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-scan-results
+          path: reports/
+
+  code-scanning:
+    name: Static Code Analysis (SAST)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.305'
+      
+      - name: Install Security Code Scan
+        run: dotnet tool install --global security-scan
+      
+      - name: Run Security Code Scan
+        run: |
+          dotnet build IOC.sln
+          security-scan --project IOC.sln --output reports/sast-results.json
+      
+      - name: Upload SAST results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sast-results
+          path: reports/
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run dotnet list package vulnerabilities
+        run: dotnet list package --vulnerable --include-transitive
+      
+      - name: Check for known vulnerabilities
+        run: |
+          if dotnet list package --vulnerable --include-transitive | grep -q "vulnerable"; then
+            echo "Vulnerable packages detected!"
+            exit 1
+          fi
+
+

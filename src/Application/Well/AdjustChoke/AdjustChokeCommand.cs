@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using IOC.BuildingBlocks;
 using IOC.Core.Domain.Well;
 using IOC.Application.Common.Outbox;
+using IOC.Application.Well;
 
 namespace IOC.Application.Well.AdjustChoke;
 
@@ -16,12 +17,6 @@ public sealed class AdjustChokeValidator : AbstractValidator<AdjustChokeCommand>
         RuleFor(x => x.WellId).NotEmpty();
         RuleFor(x => x.NewPercent).InclusiveBetween(0, 100);
     }
-}
-
-public interface IWellRepository
-{
-    Task<Core.Domain.Well.Well?> GetAsync(Guid id, CancellationToken ct);
-    Task SaveAsync(Core.Domain.Well.Well well, CancellationToken ct);
 }
 
 public sealed class AdjustChokeHandler : IRequestHandler<AdjustChokeCommand, Result>

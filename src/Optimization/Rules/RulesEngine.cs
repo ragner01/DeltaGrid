@@ -1,6 +1,6 @@
-using System.Text;
-
 namespace IOC.Optimization.Rules;
+
+using System.Text;
 
 public sealed class RulesEngine
 {
@@ -18,20 +18,33 @@ public sealed class RulesEngine
         double choke = Math.Clamp(last.chokePct, c.minChoke, c.maxChoke);
         if (last.chokePct != choke) sb.Append(" clamp_choke");
 
-        if (last.pressurePa > c.maxP) { choke = Math.Max(choke - 1, c.minChoke); sb.Append(" reduce_choke_highP"); }
-        if (last.pressurePa < c.minP) { choke = Math.Min(choke + 1, c.maxChoke); sb.Append(" open_choke_lowP"); }
+        if (last.pressurePa > c.maxP)
+        {
+            choke = Math.Max(choke - 1, c.minChoke);
+            sb.Append(" reduce_choke_highP");
+        }
+
+        if (last.pressurePa < c.minP)
+        {
+            choke = Math.Min(choke + 1, c.maxChoke);
+            sb.Append(" open_choke_lowP");
+        }
 
         double esp = last.espFreqHz;
         if (liftMethod.Equals("ESP", StringComparison.OrdinalIgnoreCase))
         {
-            if (last.temperatureC > c.maxT) { esp = Math.Max(esp - 1, 0); sb.Append(" reduce_esp_highT"); }
-            if (last.temperatureC < c.minT) { esp = esp; }
+            if (last.temperatureC > c.maxT)
+            {
+                esp = Math.Max(esp - 1, 0);
+                sb.Append(" reduce_esp_highT");
+            }
+            // Temperature within range - keep ESP at current level
         }
 
         if (points.Count >= 5)
         {
             var recentFlows = points.Take(5).Select(p => p.flowM3s).ToArray();
-            if (recentFlows.Zip(recentFlows.Skip(1), (a,b) => b - a).All(d => d > 0))
+            if (recentFlows.Zip(recentFlows.Skip(1), (a, b) => b - a).All(d => d > 0))
             {
                 sb.Append(" trend_up");
             }

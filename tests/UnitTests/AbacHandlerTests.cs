@@ -2,6 +2,8 @@ using System.Security.Claims;
 using FluentAssertions;
 using IOC.Security;
 using Microsoft.AspNetCore.Authorization;
+using Xunit;
+using System.Threading.Tasks;
 
 namespace IOC.UnitTests;
 

@@ -4,6 +4,8 @@ using System.Text;
 using IOC.Application.Lab;
 using IOC.Core.Domain.Lab;
 
+using Microsoft.Extensions.Logging;
+
 namespace IOC.Infrastructure.Persistence;
 
 public sealed class InMemoryLabRepository : ILabRepository

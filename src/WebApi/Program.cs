@@ -10,7 +10,9 @@ using IOC.Application.Allocation.Reconcile;
 using IOC.Application.PTW;
 using IOC.Application.Integrity;
 using IOC.Application.Pipeline;
+using IOC.Core.Domain.Pipeline;
 using IOC.Application.Custody;
+using IOC.Core.Domain.Custody;
 using IOC.Application.Lab;
 using IOC.Application.Twin;
 using IOC.Infrastructure.Persistence;
@@ -86,21 +88,15 @@ builder.Services.AddOpenTelemetry()
     .WithTracing(t => t.AddAspNetCoreInstrumentation())
     .WithMetrics(m => m.AddAspNetCoreInstrumentation());
 
-builder.Services.AddMediatR(cfg => {
-    cfg.RegisterServicesFromAssembly(typeof(CreateWorkOrderHandler).Assembly);
-    cfg.RegisterServicesFromAssembly(typeof(AdjustChokeHandler).Assembly);
-    cfg.RegisterServicesFromAssembly(typeof(RunAllocationHandler).Assembly);
-    cfg.RegisterServicesFromAssembly(typeof(ReconcileAllocationHandler).Assembly);
-    cfg.RegisterServicesFromAssembly(typeof(PtwHandlers).Assembly);
-});
+builder.Services.AddMediatR(typeof(IOC.Application.Work.CreateWorkOrder.CreateWorkOrderHandler).Assembly);
 
-builder.Services.AddValidatorsFromAssemblyContaining<CreateWorkOrderValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<AdjustChokeValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<RunAllocationValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<CreateWorkOrderCommand>();
+builder.Services.AddValidatorsFromAssemblyContaining<IOC.Application.Work.CreateWorkOrder.CreateWorkOrderValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<IOC.Application.Well.AdjustChoke.AdjustChokeValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<IOC.Application.Allocation.RunAllocation.RunAllocationValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<IOC.Application.Work.CreateWorkOrder.CreateWorkOrderCommand>();
 
 builder.Services.AddSingleton<IWorkOrderRepository, InMemoryWorkOrderRepository>();
-builder.Services.AddSingleton<IWellRepository, InMemoryWellRepository>();
+builder.Services.AddSingleton<IOC.Application.Well.IWellRepository, InMemoryWellRepository>();
 builder.Services.AddSingleton<IOC.Application.Common.Outbox.IOutboxStore, InMemoryOutboxStore>();
 
 builder.Services.AddSingleton<IBatteryRepository, InMemoryBatteryRepository>();
@@ -197,7 +193,7 @@ var v1 = app.MapGroup("/api/v{version:apiVersion}")
     .WithMetadata(new ApiVersion(1, 0))
     .RequireAuthorization("TenantScoped");
 
-v1.MapPost("/work/orders", async (CreateWorkOrderCommand cmd, ISender sender, CancellationToken ct) =>
+v1.MapPost("/work/orders", async (IOC.Application.Work.CreateWorkOrder.CreateWorkOrderCommand cmd, ISender sender, CancellationToken ct) =>
 {
     var result = await sender.Send(cmd, ct);
     return result.IsSuccess
@@ -246,7 +242,7 @@ v1.MapGet("/allocation/export/sample.csv", () =>
     return Results.Text(csv.ToString(), "text/csv", Encoding.UTF8);
 });
 
-v1.MapPost("/ptw/workorders", async (CreateWorkOrderCommand cmd, ISender sender, CancellationToken ct) =>
+v1.MapPost("/ptw/workorders", async (IOC.Application.PTW.CreateWorkOrderCommand cmd, ISender sender, CancellationToken ct) =>
 {
     var result = await sender.Send(cmd, ct);
     return result.IsSuccess ? Results.Created($"/api/v1/ptw/workorders/{result.Value}", new { id = result.Value }) : Results.BadRequest(new { error = result.Error });
@@ -319,19 +315,19 @@ v1.MapPost("/pipeline/{segmentId}/calibrate", async (string segmentId, [FromBody
 // Leak detect
 v1.MapPost("/pipeline/{segmentId}/detect", async (string segmentId, [FromBody] DetectLeakBody body, ISender sender, CancellationToken ct) =>
 {
-    var r = await sender.Send(new DetectLeakCommand(segmentId, body.Upstream_m3_s, body.Downstream_m3_s, new Core.Domain.Pipeline.MeterUncertainty(body.UpMeterId, body.UpUncertaintyPct), new Core.Domain.Pipeline.MeterUncertainty(body.DnMeterId, body.DnUncertaintyPct), body.ElevationDelta_m, body.Temperature_C, DateTimeOffset.UtcNow), ct);
+    var r = await sender.Send(new DetectLeakCommand(segmentId, body.Upstream_m3_s, body.Downstream_m3_s, new MeterUncertainty(body.UpMeterId, body.UpUncertaintyPct), new MeterUncertainty(body.DnMeterId, body.DnUncertaintyPct), body.ElevationDelta_m, body.Temperature_C, DateTimeOffset.UtcNow), ct);
     return r.IsSuccess ? Results.Ok(r.Value) : Results.BadRequest(new { error = r.Error });
 });
 
 // Custody: register meter
-v1.MapPost("/custody/meters", async ([FromBody] Commands.RegisterMeterCommand cmd, ISender sender, CancellationToken ct) =>
+v1.MapPost("/custody/meters", async ([FromBody] IOC.Application.Custody.Commands.RegisterMeterCommand cmd, ISender sender, CancellationToken ct) =>
 {
     var r = await sender.Send(cmd, ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
 });
 
 // Custody: register prover
-v1.MapPost("/custody/provers", async ([FromBody] Commands.RegisterProverCommand cmd, ISender sender, CancellationToken ct) =>
+v1.MapPost("/custody/provers", async ([FromBody] IOC.Application.Custody.Commands.RegisterProverCommand cmd, ISender sender, CancellationToken ct) =>
 {
     var r = await sender.Send(cmd, ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
@@ -340,12 +336,12 @@ v1.MapPost("/custody/provers", async ([FromBody] Commands.RegisterProverCommand 
 // Custody: run proving
 v1.MapPost("/custody/proving", async ([FromBody] ProvingRunInput input, ISender sender, CancellationToken ct) =>
 {
-    var r = await sender.Send(new Commands.RunProvingCommand(input), ct);
+    var r = await sender.Send(new IOC.Application.Custody.Commands.RunProvingCommand(input), ct);
     return r.IsSuccess ? Results.Ok(r.Value) : Results.BadRequest(new { error = r.Error });
 });
 
 // Custody: generate ticket
-v1.MapPost("/custody/tickets", async ([FromBody] Commands.GenerateTicketCommand cmd, ISender sender, CancellationToken ct) =>
+v1.MapPost("/custody/tickets", async ([FromBody] IOC.Application.Custody.Commands.GenerateTicketCommand cmd, ISender sender, CancellationToken ct) =>
 {
     var r = await sender.Send(cmd, ct);
     return r.IsSuccess ? Results.Ok(new { ticketNumber = r.Value }) : Results.BadRequest(new { error = r.Error });
@@ -354,12 +350,12 @@ v1.MapPost("/custody/tickets", async ([FromBody] Commands.GenerateTicketCommand 
 // Custody: approve ticket
 v1.MapPost("/custody/tickets/{ticketNumber}/approve", async (string ticketNumber, ISender sender, CancellationToken ct) =>
 {
-    var r = await sender.Send(new Commands.ApproveTicketCommand(ticketNumber), ct);
+    var r = await sender.Send(new IOC.Application.Custody.Commands.ApproveTicketCommand(ticketNumber), ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
 });
 
 // Lab: plan sample
-v1.MapPost("/lab/samples/plan", async ([FromBody] Commands.PlanSampleCommand cmd, ISender sender, CancellationToken ct) =>
+v1.MapPost("/lab/samples/plan", async ([FromBody] IOC.Application.Lab.Commands.PlanSampleCommand cmd, ISender sender, CancellationToken ct) =>
 {
     var r = await sender.Send(cmd, ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
@@ -368,19 +364,19 @@ v1.MapPost("/lab/samples/plan", async ([FromBody] Commands.PlanSampleCommand cmd
 // Lab: mark collected
 v1.MapPost("/lab/samples/{sampleId}/collect", async (string sampleId, [FromBody] DateTimeOffset collectedAt, ISender sender, CancellationToken ct) =>
 {
-    var r = await sender.Send(new Commands.MarkCollectedCommand(sampleId, collectedAt, "field"), ct);
+    var r = await sender.Send(new IOC.Application.Lab.Commands.MarkCollectedCommand(sampleId, collectedAt, "field"), ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
 });
 
 // Lab: receive sample
 v1.MapPost("/lab/samples/{sampleId}/receive", async (string sampleId, ISender sender, CancellationToken ct) =>
 {
-    var r = await sender.Send(new Commands.ReceiveSampleCommand(sampleId, "lab"), ct);
+    var r = await sender.Send(new IOC.Application.Lab.Commands.ReceiveSampleCommand(sampleId, "lab"), ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
 });
 
 // Lab: record result
-v1.MapPost("/lab/results", async ([FromBody] Commands.RecordLabResultCommand cmd, ISender sender, CancellationToken ct) =>
+v1.MapPost("/lab/results", async ([FromBody] IOC.Application.Lab.Commands.RecordLabResultCommand cmd, ISender sender, CancellationToken ct) =>
 {
     var r = await sender.Send(cmd, ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
@@ -389,21 +385,21 @@ v1.MapPost("/lab/results", async ([FromBody] Commands.RecordLabResultCommand cmd
 // Lab: set quality flag
 v1.MapPost("/lab/results/{sampleId}/quality", async (string sampleId, [FromBody] string flag, ISender sender, CancellationToken ct) =>
 {
-    var r = await sender.Send(new Commands.SetQualityFlagCommand(sampleId, flag, "lab"), ct);
+    var r = await sender.Send(new IOC.Application.Lab.Commands.SetQualityFlagCommand(sampleId, flag, "lab"), ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
 });
 
 // Lab: request retest
 v1.MapPost("/lab/samples/{sampleId}/retest", async (string sampleId, [FromBody] string reason, ISender sender, CancellationToken ct) =>
 {
-    var r = await sender.Send(new Commands.RequestRetestCommand(sampleId, reason, "ops"), ct);
+    var r = await sender.Send(new IOC.Application.Lab.Commands.RequestRetestCommand(sampleId, reason, "ops"), ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
 });
 
 // Lab: push properties
 v1.MapPost("/lab/results/{sampleId}/push", async (string sampleId, ISender sender, CancellationToken ct) =>
 {
-    var r = await sender.Send(new Commands.PushPropertiesCommand(sampleId), ct);
+    var r = await sender.Send(new IOC.Application.Lab.Commands.PushPropertiesCommand(sampleId), ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
 });
 
@@ -429,12 +425,12 @@ v1.MapPost("/twin/import", async (HttpContext http, [FromBody] List<string> csvL
     var prefix = http.User.FindFirst("twin:path")?.Value ?? "/";
     if (csvLines.Any(l => !string.IsNullOrWhiteSpace(l) && !l.Split(',')[0].Trim().StartsWith(prefix)))
         return Results.Forbid();
-    var r = await sender.Send(new Commands.ImportHierarchyCommand(csvLines), ct);
+    var r = await sender.Send(new IOC.Application.Twin.Commands.ImportHierarchyCommand(csvLines), ct);
     return r.IsSuccess ? Results.Ok(new { version = r.Value }) : Results.BadRequest(new { error = r.Error });
 }).RequireAuthorization("TwinPathScope");
 
 // Twin: upsert node
-v1.MapPost("/twin/nodes", async (HttpContext http, [FromBody] Commands.UpsertNodeCommand cmd, ISender sender, CancellationToken ct) =>
+v1.MapPost("/twin/nodes", async (HttpContext http, [FromBody] IOC.Application.Twin.Commands.UpsertNodeCommand cmd, ISender sender, CancellationToken ct) =>
 {
     if (!IsAllowedPath(http, cmd.IdPath)) return Results.Forbid();
     var r = await sender.Send(cmd, ct);
@@ -445,7 +441,7 @@ v1.MapPost("/twin/nodes", async (HttpContext http, [FromBody] Commands.UpsertNod
 v1.MapDelete("/twin/nodes", async (HttpContext http, [FromQuery] string idPath, ISender sender, CancellationToken ct) =>
 {
     if (!IsAllowedPath(http, idPath)) return Results.Forbid();
-    var r = await sender.Send(new Commands.SoftDeleteNodeCommand(idPath), ct);
+    var r = await sender.Send(new IOC.Application.Twin.Commands.SoftDeleteNodeCommand(idPath), ct);
     return r.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = r.Error });
 }).RequireAuthorization("TwinPathScope");
 
@@ -453,7 +449,7 @@ v1.MapDelete("/twin/nodes", async (HttpContext http, [FromQuery] string idPath, 
 v1.MapGet("/twin/snapshot", async (HttpContext http, [FromQuery] string idPath, ISender sender, CancellationToken ct) =>
 {
     if (!IsAllowedPath(http, idPath)) return Results.Forbid();
-    var r = await sender.Send(new Commands.SnapshotQuery(idPath), ct);
+    var r = await sender.Send(new IOC.Application.Twin.Commands.SnapshotQuery(idPath), ct);
     return r.IsSuccess ? Results.Ok(r.Value) : Results.NotFound(new { error = r.Error });
 }).RequireAuthorization("TwinPathScope");
 
@@ -461,7 +457,7 @@ v1.MapGet("/twin/snapshot", async (HttpContext http, [FromQuery] string idPath, 
 v1.MapGet("/twin/impact", async (HttpContext http, [FromQuery] string idPath, [FromQuery] string relation, ISender sender, CancellationToken ct) =>
 {
     if (!IsAllowedPath(http, idPath)) return Results.Forbid();
-    var r = await sender.Send(new Commands.ImpactQuery(idPath, relation), ct);
+    var r = await sender.Send(new IOC.Application.Twin.Commands.ImpactQuery(idPath, relation), ct);
     return r.IsSuccess ? Results.Ok(r.Value) : Results.BadRequest(new { error = r.Error });
 }).RequireAuthorization("TwinPathScope");
 

@@ -76,8 +76,6 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
 app.Run();
 
-public partial class Program {}
-
 static async Task SeedAsync(IServiceProvider services)
 {
     using var scope = services.CreateScope();

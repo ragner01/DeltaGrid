@@ -1,10 +1,12 @@
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
+using System.Threading.Channels;
 using MQTTnet;
 using MQTTnet.Client;
 using Opc.Ua;
 using Opc.Ua.Client;
 using Opc.Ua.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace IOC.Ingestion;
 
@@ -60,14 +62,27 @@ public sealed class OpcUaConnector : IConnector
         {
             mi.Notification += (item, args) =>
             {
-                foreach (var value in args.NotificationValue as MonitoredItemNotification[] ?? Array.Empty<MonitoredItemNotification>())
+                void Handle(MonitoredItemNotification notification)
                 {
-                    var dv = value.Value;
-                    if (dv.Value is IConvertible)
+                    var dv = notification.Value;
+                    if (dv.Value is IConvertible convertible)
                     {
-                        var tv = Convert.ToDouble(dv.Value);
+                        var tv = Convert.ToDouble(convertible);
                         var q = dv.StatusCode == StatusCodes.Good ? "Good" : "Bad";
-                        channel.Writer.TryWrite(new TagReading($"opc:{mi.StartNodeId}", tv, q, dv.SourceTimestamp ?? DateTime.UtcNow, "", _site, _asset));
+                        var timestamp = dv.SourceTimestamp != default(DateTime) ? DateTimeOffset.FromFileTime(dv.SourceTimestamp.ToFileTime()) : DateTimeOffset.UtcNow;
+                        channel.Writer.TryWrite(new TagReading($"opc:{mi.StartNodeId}", tv, q, timestamp, string.Empty, _site, _asset));
+                    }
+                }
+
+                if (args.NotificationValue is MonitoredItemNotification single)
+                {
+                    Handle(single);
+                }
+                else if (args.NotificationValue is Opc.Ua.ExtensionObject extObj && extObj.Body is MonitoredItemNotification[] notifications)
+                {
+                    foreach (var note in notifications)
+                    {
+                        Handle(note);
                     }
                 }
             };
@@ -186,20 +201,28 @@ public sealed class PiConnector : IConnector
         // Simple poller example, replace with stream if available
         while (!cancellationToken.IsCancellationRequested)
         {
+            TagReading? reading = null;
             try
             {
                 var resp = await _http.GetAsync(_baseUrl + _tagPath, cancellationToken);
                 if (resp.IsSuccessStatusCode)
                 {
                     var json = await resp.Content.ReadAsStringAsync(cancellationToken);
-                    // expecting a JSON with Value and Timestamp; parse minimal
                     if (double.TryParse(System.Text.Json.JsonDocument.Parse(json).RootElement.GetProperty("Value").ToString(), out var v))
                     {
-                        yield return new TagReading("pi:tag", v, "Good", DateTimeOffset.UtcNow, "", _site, _asset);
+                        reading = new TagReading("pi:tag", v, "Good", DateTimeOffset.UtcNow, string.Empty, _site, _asset);
                     }
                 }
             }
-            catch { }
+            catch
+            {
+                // swallow transient errors in simulator
+            }
+
+            if (reading is not null)
+            {
+                yield return reading;
+            }
 
             await Task.Delay(300, cancellationToken);
         }

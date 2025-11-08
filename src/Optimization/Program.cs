@@ -3,11 +3,12 @@ using IOC.Optimization.Inference;
 using IOC.Optimization.Rules;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
 
@@ -25,14 +26,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization(o =>
-{
-    o.AddPolicy("OptimizationExecutor", p => p.RequireRole("ProductionEngineer", "Admin"));
-});
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("OptimizationExecutor", p => p.RequireRole("ProductionEngineer", "Admin"));
 
 builder.Services.AddOpenTelemetry()
-    .WithTracing(t => t.AddAspNetCoreInstrumentation())
-    .WithMetrics(m => m.AddAspNetCoreInstrumentation());
+    .WithTracing(t => t
+        .AddAspNetCoreInstrumentation()
+        .AddConsoleExporter())
+    .WithMetrics(m => m
+        .AddAspNetCoreInstrumentation()
+        .AddConsoleExporter());
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -40,11 +43,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<RulesEngine>();
 
 // Model path and checksum from config; leave placeholders for now
-var modelPath = builder.Configuration["Optimization:Onnx:Path"] ?? "models/surrogate.onnx";
-var sha = builder.Configuration["Optimization:Onnx:Sha256"] ?? new string('0', 64);
+string modelPath = builder.Configuration["Optimization:Onnx:Path"] ?? "models/surrogate.onnx";
+string sha = builder.Configuration["Optimization:Onnx:Sha256"] ?? new string('0', 64);
 builder.Services.AddSingleton(new OnnxSurrogate(modelPath, sha));
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
@@ -58,27 +61,54 @@ if (app.Environment.IsDevelopment())
 
 app.MapGrpcService<OptimizerGrpcService>().RequireAuthorization("OptimizationExecutor");
 
-app.MapPost("/optimize", (OptimizeRequest req, RulesEngine rules, OnnxSurrogate onnx) =>
+app.MapPost("/optimize", (IOC.Optimization.OptimizeRequest req, RulesEngine rules, OnnxSurrogate onnx) =>
 {
-    var window = req.Window.Select(p => (DateTimeOffset.FromUnixTimeMilliseconds(p.TsUnixMs), p.PressurePa, p.TemperatureC, p.FlowM3S, p.ChokePct, p.EspFreqHz));
-    var c = (req.Constraints.MinChokePct, req.Constraints.MaxChokePct, req.Constraints.MinPressurePa, req.Constraints.MaxPressurePa, req.Constraints.MinTemperatureC, req.Constraints.MaxTemperatureC);
-    var (rChoke, rEsp, rationaleRules) = rules.Recommend(req.LiftMethod, window, c);
+    // Convert gRPC types to tuples expected by RulesEngine
+    IEnumerable<(DateTimeOffset ts, double pressurePa, double temperatureC, double flowM3s, double chokePct, double espFreqHz)> window = req.Window.Select(p =>
+        (
+            ts: DateTimeOffset.FromUnixTimeMilliseconds(p.TsUnixMs),
+            pressurePa: p.PressurePa,
+            temperatureC: p.TemperatureC,
+            flowM3s: p.FlowM3S,
+            chokePct: p.ChokePct,
+            espFreqHz: p.EspFreqHz
+        ));
+    (double minChoke, double maxChoke, double minP, double maxP, double minT, double maxT) c = (
+        req.Constraints.MinChokePct,
+        req.Constraints.MaxChokePct,
+        req.Constraints.MinPressurePa,
+        req.Constraints.MaxPressurePa,
+        req.Constraints.MinTemperatureC,
+        req.Constraints.MaxTemperatureC);
+    (double chokePct, double espFreqHz, string rationale) result = rules.Recommend(req.LiftMethod, window, c);
+    double rChoke = result.chokePct;
+    double rEsp = result.espFreqHz;
+    string rationaleRules = result.rationale;
+
     // simple features: last point concatenated with rule outputs
-    var last = req.Window.LastOrDefault();
-    var feats = new double[] { last.PressurePa, last.TemperatureC, last.FlowM3S, last.ChokePct, last.EspFreqHz, rChoke, rEsp };
-    var (mChoke, mEsp, rationaleOnnx) = onnx.Predict(req.LiftMethod, feats);
+    TelemetryPoint? last = req.Window.LastOrDefault();
+    if (last == null)
+    {
+        return Results.BadRequest("Window cannot be empty");
+    }
+
+    double[] feats = { last.PressurePa, last.TemperatureC, last.FlowM3S, last.ChokePct, last.EspFreqHz, rChoke, rEsp };
+    (double, double, string) onnxResult = onnx.Predict(req.LiftMethod, feats);
+    double mChoke = onnxResult.Item1;
+    double mEsp = onnxResult.Item2;
+    string rationaleOnnx = onnxResult.Item3;
 
     // blend: average with guardrails
     double choke = Math.Clamp((rChoke + mChoke) / 2.0, req.Constraints.MinChokePct, req.Constraints.MaxChokePct);
     double esp = Math.Max(0, (rEsp + mEsp) / 2.0);
 
-    return Results.Ok(new OptimizeResponse
+    return Results.Ok(new IOC.Optimization.OptimizeResponse
     {
         WellId = req.WellId,
         LiftMethod = req.LiftMethod,
         RecommendedChokePct = Math.Round(choke, 2),
         RecommendedEspFreqHz = Math.Round(esp, 2),
-        Rationale = $"{rationaleRules}; {rationaleOnnx}"
+        Rationale = $"{rationaleRules};  {rationaleOnnx}",
     });
 }).RequireAuthorization("OptimizationExecutor");
 
@@ -86,4 +116,9 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
 app.Run();
 
-public partial class Program {}
+/// <summary>
+/// Program entry point.
+/// </summary>
+public partial class Program
+{
+}

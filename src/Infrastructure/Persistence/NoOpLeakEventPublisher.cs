@@ -1,6 +1,8 @@
 using IOC.Application.Pipeline;
 using IOC.Core.Domain.Pipeline;
 
+using Microsoft.Extensions.Logging;
+
 namespace IOC.Infrastructure.Persistence;
 
 public sealed class NoOpLeakEventPublisher : ILeakEventPublisher

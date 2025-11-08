@@ -9,4 +9,5 @@ public static class Roles
     public const string HSELead = "HSELead";
     public const string Auditor = "Auditor";
     public const string Admin = "Admin";
+    public const string DataSteward = "DataSteward";
 }

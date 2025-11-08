@@ -1,3 +1,5 @@
+using System.Data;
+using Microsoft.Extensions.Configuration;
 using Kusto.Data;
 using Kusto.Data.Common;
 using Kusto.Data.Net.Client;
