@@ -14,7 +14,7 @@ on:
 env:
   AZURE_RESOURCE_GROUP: rg-deltagrid-dev
   AZURE_LOCATION: westeurope
-  DOTNET_VERSION: '9.0.305'
+  DOTNET_VERSION: '8.0.404'
 
 jobs:
   build:

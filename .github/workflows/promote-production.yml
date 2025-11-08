@@ -56,9 +56,17 @@ jobs:
         run: |
           curl -f https://app-deltagrid-api-staging.azurewebsites.net/health || exit 1
       
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.404'
+      
+      - name: Restore dependencies
+        run: dotnet restore IOC.sln
+      
       - name: Run smoke tests
         run: |
-          dotnet test tests/SmokeTests -c Release || exit 1
+          dotnet test tests/SmokeTests -c Release --no-restore || exit 1
 
   deploy-canary:
     name: Deploy Canary

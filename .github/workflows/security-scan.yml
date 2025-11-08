@@ -31,7 +31,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.305'
+          dotnet-version: '8.0.404'
       
       - name: Restore dependencies
         run: dotnet restore
@@ -62,7 +62,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.305'
+          dotnet-version: '8.0.404'
       
       - name: Install Security Code Scan
         run: dotnet tool install --global security-scan

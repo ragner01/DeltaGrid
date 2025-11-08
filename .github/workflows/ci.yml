@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.305'
+          dotnet-version: '8.0.404'
       - run: dotnet --info
       - run: dotnet restore IOC.sln
       - run: dotnet build IOC.sln -c Release --no-restore
