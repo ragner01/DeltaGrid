@@ -4,11 +4,11 @@ public static class Guard
 {
     public static GuardAgainst Against => new();
 
-    public static void AgainstNull(object? input, string name)
+    public static void AgainstNull(object? input, string parameterName)
     {
         if (input is null)
         {
-            throw new ArgumentNullException(name);
+            throw new ArgumentNullException(parameterName);
         }
     }
 
@@ -32,7 +32,8 @@ public class GuardAgainst
         return input!;
     }
 
-    public T Null<T>(T? input, string parameterName) where T : class
+    public T Null<T>(T? input, string parameterName)
+        where T : class
     {
         if (input is null)
         {

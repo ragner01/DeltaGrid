@@ -1,8 +1,32 @@
 namespace IOC.Core.Domain.PTW;
 
-public enum WorkOrderStatus { Draft, Planned, InProgress, Completed, Cancelled }
-public enum PermitType { Hot, Cold, ConfinedSpace, Electrical }
-public enum PermitStatus { Draft, PendingApproval, Approved, Active, Suspended, Closed, Rejected }
+public enum WorkOrderStatus
+{
+    Draft,
+    Planned,
+    InProgress,
+    Completed,
+    Cancelled
+}
+
+public enum PermitType
+{
+    Hot,
+    Cold,
+    ConfinedSpace,
+    Electrical
+}
+
+public enum PermitStatus
+{
+    Draft,
+    PendingApproval,
+    Approved,
+    Active,
+    Suspended,
+    Closed,
+    Rejected
+}
 
 public sealed record IsolationPoint(string Id, string Description, bool Isolated, string Method); // e.g., valve tag, lock, tag
 

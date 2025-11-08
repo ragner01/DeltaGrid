@@ -53,7 +53,7 @@ public sealed class AdxIngestionWorker : BackgroundService
         }
         finally
         {
-            await _processor.StopProcessingAsync();
+            await _processor.StopProcessingAsync(stoppingToken);
         }
     }
 

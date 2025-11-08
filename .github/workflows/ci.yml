@@ -27,11 +27,11 @@ jobs:
       
       - name: Run unit tests
         continue-on-error: true
-        run: dotnet test tests/UnitTests/UnitTests.csproj -c Release --no-build --logger "trx;LogFileName=unit-test-results.trx" --verbosity normal
+        run: dotnet test tests/UnitTests/UnitTests.csproj -c Release --no-build --logger "trx;LogFileName=unit-test-results.trx" --verbosity normal --collect:"XPlat Code Coverage"
       
       - name: Run integration tests
         continue-on-error: true
-        run: dotnet test tests/IntegrationTests/IntegrationTests.csproj -c Release --no-build --logger "trx;LogFileName=integration-test-results.trx" --verbosity normal
+        run: dotnet test tests/IntegrationTests/IntegrationTests.csproj -c Release --no-build --logger "trx;LogFileName=integration-test-results.trx" --verbosity normal --collect:"XPlat Code Coverage"
       
       - name: Upload test results
         if: always()
@@ -44,6 +44,7 @@ jobs:
       - name: Upload code coverage
         if: always()
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: code-coverage
           path: '**/coverage.cobertura.xml'
