@@ -1,10 +1,13 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Xunit;
 
 namespace IOC.IntegrationTests;
@@ -17,7 +20,7 @@ public class LeakDetectionEndpointTests : IClassFixture<WebApplicationFactory<gl
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseEnvironment("Test");
+            builder.UseEnvironment(Environments.Development);
             builder.ConfigureAppConfiguration((context, config) =>
             {
                 config.AddInMemoryCollection(new Dictionary<string, string?>
