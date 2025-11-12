@@ -31,8 +31,30 @@ public static class SecurityExtensions
         // For test environments, use a mock Key Vault if URL is not configured
         if (string.IsNullOrEmpty(keyVaultUrl))
         {
-            var env = configuration["ASPNETCORE_ENVIRONMENT"] ?? configuration["Environment"] ?? "Production";
-            if (env == "Test" || env == "Testing" || env.Contains("Test"))
+            // Check both configuration and host environment
+            var envFromConfig = configuration["ASPNETCORE_ENVIRONMENT"] 
+                ?? configuration["Environment"] 
+                ?? configuration["Hosting:Environment"];
+            
+            // Also check if we can get the host environment from service provider
+            var isTestEnvironment = false;
+            if (!string.IsNullOrEmpty(envFromConfig))
+            {
+                isTestEnvironment = envFromConfig.Equals("Test", StringComparison.OrdinalIgnoreCase) 
+                    || envFromConfig.Equals("Testing", StringComparison.OrdinalIgnoreCase)
+                    || envFromConfig.Contains("Test", StringComparison.OrdinalIgnoreCase);
+            }
+            
+            // If still not determined, check if we're in a test assembly context
+            // (This is a fallback - tests should set the environment explicitly)
+            if (!isTestEnvironment)
+            {
+                // Check if KeyVault:Url is explicitly set to empty/null, which indicates test mode
+                var explicitTestMode = configuration["KeyVault:UseTestMode"] == "true";
+                isTestEnvironment = explicitTestMode;
+            }
+            
+            if (isTestEnvironment)
             {
                 // Use a test-friendly mock Key Vault manager
                 services.AddSingleton<IKeyVaultSecretManager>(sp =>

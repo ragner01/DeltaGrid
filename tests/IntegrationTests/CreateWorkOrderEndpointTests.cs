@@ -20,13 +20,14 @@ public class CreateWorkOrderEndpointTests : IClassFixture<WebApplicationFactory<
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseEnvironment(Environments.Development);
+            builder.UseEnvironment("Test");
             builder.ConfigureAppConfiguration((context, config) =>
             {
                 config.AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     ["ASPNETCORE_ENVIRONMENT"] = "Test",
-                    ["Environment"] = "Test"
+                    ["Environment"] = "Test",
+                    ["KeyVault:UseTestMode"] = "true"
                 });
             });
         });

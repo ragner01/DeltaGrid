@@ -1,3 +1,5 @@
+using IOC.BuildingBlocks.Security;
+using IOC.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Trace;
@@ -8,16 +10,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o => o.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateIssuerSigningKey = false,
-        ValidateLifetime = true,
-    });
+builder.Services.AddRequestSizeLimits();
+builder.Services.AddSecureJwtAuthentication(builder.Configuration);
+builder.Services.AddSecureCors(builder.Configuration);
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("TenantScoped", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireAssertion(ctx => ctx.User.HasClaim(c => c.Type == ClaimsSchema.TenantId));
+    });
+});
 
 builder.Services.AddOpenTelemetry()
     .WithTracing(t => t.AddAspNetCoreInstrumentation())
@@ -34,7 +38,10 @@ builder.Services.AddSingleton<IOC.MDM.SnapshotStore>();
 
 var app = builder.Build();
 
+app.UseSecurityHeaders();
+app.UseRequestSizeLimit();
 app.UseSerilogRequestLogging();
+app.UseCors("AllowedOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -45,8 +52,10 @@ if (app.Environment.IsDevelopment())
 }
 
 // Reference lookups
-app.MapGet("/mdm/units", (IOC.MDM.ReferenceStore refs) => Results.Ok(refs.Units()));
-app.MapGet("/mdm/codes", (IOC.MDM.ReferenceStore refs) => Results.Ok(refs.Codes()));
+app.MapGet("/mdm/units", (IOC.MDM.ReferenceStore refs) => Results.Ok(refs.Units()))
+    .RequireAuthorization("TenantScoped");
+app.MapGet("/mdm/codes", (IOC.MDM.ReferenceStore refs) => Results.Ok(refs.Codes()))
+    .RequireAuthorization("TenantScoped");
 
 // Bulk import and snapshot export
 app.MapPost("/mdm/import", (List<IOC.MDM.MasterRecord> records, IOC.MDM.GoldenRecordStore gr, IOC.MDM.SnapshotStore snaps) =>
@@ -54,24 +63,22 @@ app.MapPost("/mdm/import", (List<IOC.MDM.MasterRecord> records, IOC.MDM.GoldenRe
     foreach (var r in records) gr.Upsert(r);
     var snap = snaps.CreateSnapshot();
     return Results.Ok(new { snapshotId = snap.Id, count = records.Count });
-}).RequireAuthorization();
+}).RequireAuthorization("TenantScoped");
 
 app.MapGet("/mdm/snapshots/{id}", (string id, IOC.MDM.SnapshotStore snaps) =>
 {
     return snaps.TryGet(id, out var s) ? Results.Ok(s) : Results.NotFound();
-});
+}).RequireAuthorization("TenantScoped");
 
 // Diff and audit
 app.MapGet("/mdm/diff", (string fromId, string toId, IOC.MDM.SnapshotStore snaps) =>
 {
     var diff = snaps.Diff(fromId, toId);
     return Results.Ok(diff);
-});
+}).RequireAuthorization("TenantScoped");
 
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
 app.Run();
 
 public partial class Program { }
-
-
