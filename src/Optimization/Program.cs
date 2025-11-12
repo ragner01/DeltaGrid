@@ -61,7 +61,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapGrpcService<OptimizerGrpcService>().RequireAuthorization("OptimizationExecutor");
 
-app.MapPost("/optimize", (IOC.Optimization.OptimizeRequest req, RulesEngine rules, OnnxSurrogate onnx) =>
+app.MapPost("/optimize", (OptimizeRequest req, RulesEngine rules, OnnxSurrogate onnx) =>
 {
     // Convert gRPC types to tuples expected by RulesEngine
     IEnumerable<(DateTimeOffset ts, double pressurePa, double temperatureC, double flowM3s, double chokePct, double espFreqHz)> window = req.Window.Select(p =>
@@ -80,10 +80,7 @@ app.MapPost("/optimize", (IOC.Optimization.OptimizeRequest req, RulesEngine rule
         req.Constraints.MaxPressurePa,
         req.Constraints.MinTemperatureC,
         req.Constraints.MaxTemperatureC);
-    (double chokePct, double espFreqHz, string rationale) result = rules.Recommend(req.LiftMethod, window, c);
-    double rChoke = result.chokePct;
-    double rEsp = result.espFreqHz;
-    string rationaleRules = result.rationale;
+    (double rChoke, double rEsp, string rationaleRules) = rules.Recommend(req.LiftMethod, window, c);
 
     // simple features: last point concatenated with rule outputs
     TelemetryPoint? last = req.Window.LastOrDefault();
@@ -102,7 +99,7 @@ app.MapPost("/optimize", (IOC.Optimization.OptimizeRequest req, RulesEngine rule
     double choke = Math.Clamp((rChoke + mChoke) / 2.0, req.Constraints.MinChokePct, req.Constraints.MaxChokePct);
     double esp = Math.Max(0, (rEsp + mEsp) / 2.0);
 
-    return Results.Ok(new IOC.Optimization.OptimizeResponse
+    return Results.Ok(new OptimizeResponse
     {
         WellId = req.WellId,
         LiftMethod = req.LiftMethod,
