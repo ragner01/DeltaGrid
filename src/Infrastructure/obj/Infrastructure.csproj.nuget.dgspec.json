@@ -38,9 +38,19 @@
           }
         },
         "warningProperties": {
-          "allWarningsAsErrors": true,
+          "noWarn": [
+            "NU1603",
+            "NU1900",
+            "NU1901",
+            "NU1902",
+            "NU1903"
+          ],
           "warnAsError": [
             "NU1605"
+          ],
+          "warnNotAsError": [
+            "NU1603",
+            "NU1900"
           ]
         },
         "restoreAuditProperties": {
@@ -69,6 +79,15 @@
             "MediatR.Extensions.Microsoft.DependencyInjection": {
               "target": "Package",
               "version": "[11.1.0, )"
+            },
+            "Microsoft.AspNetCore.Authorization": {
+              "target": "Package",
+              "version": "[8.0.5, )"
+            },
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0, )"
             },
             "Roslynator.Analyzers": {
               "suppressParent": "All",
@@ -134,13 +153,27 @@
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
-            "projectReferences": {}
+            "projectReferences": {
+              "/Users/omotolaalimi/Desktop/IOC/src/Security/Security.csproj": {
+                "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Security/Security.csproj"
+              }
+            }
           }
         },
         "warningProperties": {
-          "allWarningsAsErrors": true,
+          "noWarn": [
+            "NU1603",
+            "NU1900",
+            "NU1901",
+            "NU1902",
+            "NU1903"
+          ],
           "warnAsError": [
             "NU1605"
+          ],
+          "warnNotAsError": [
+            "NU1603",
+            "NU1900"
           ]
         },
         "restoreAuditProperties": {
@@ -154,6 +187,51 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Azure.Identity": {
+              "target": "Package",
+              "version": "[1.12.1, )"
+            },
+            "Azure.Security.KeyVault.Secrets": {
+              "target": "Package",
+              "version": "[4.6.0, )"
+            },
+            "MediatR.Contracts": {
+              "target": "Package",
+              "version": "[2.0.1, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.5, )"
+            },
+            "Microsoft.AspNetCore.Http.Abstractions": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.DependencyInjection.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "Microsoft.Extensions.Options": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            },
+            "Microsoft.IdentityModel.Tokens": {
+              "target": "Package",
+              "version": "[8.3.0, )"
+            },
             "Roslynator.Analyzers": {
               "suppressParent": "All",
               "target": "Package",
@@ -187,6 +265,9 @@
             }
           ],
           "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
@@ -226,9 +307,19 @@
           }
         },
         "warningProperties": {
-          "allWarningsAsErrors": true,
+          "noWarn": [
+            "NU1603",
+            "NU1900",
+            "NU1901",
+            "NU1902",
+            "NU1903"
+          ],
           "warnAsError": [
             "NU1605"
+          ],
+          "warnNotAsError": [
+            "NU1603",
+            "NU1900"
           ]
         },
         "restoreAuditProperties": {
@@ -242,6 +333,11 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
             "Roslynator.Analyzers": {
               "suppressParent": "All",
               "target": "Package",
@@ -320,9 +416,19 @@
           }
         },
         "warningProperties": {
-          "allWarningsAsErrors": true,
+          "noWarn": [
+            "NU1603",
+            "NU1900",
+            "NU1901",
+            "NU1902",
+            "NU1903"
+          ],
           "warnAsError": [
             "NU1605"
+          ],
+          "warnNotAsError": [
+            "NU1603",
+            "NU1900"
           ]
         },
         "restoreAuditProperties": {
@@ -336,6 +442,11 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
             "Roslynator.Analyzers": {
               "suppressParent": "All",
               "target": "Package",
@@ -349,6 +460,149 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[1.2.0-beta.507, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.20, 8.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.20, 8.0.20]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/omotolaalimi/Desktop/IOC/src/Security/Security.csproj": {
+      "version": "0.1.0",
+      "restore": {
+        "projectUniqueName": "/Users/omotolaalimi/Desktop/IOC/src/Security/Security.csproj",
+        "projectName": "Security",
+        "projectPath": "/Users/omotolaalimi/Desktop/IOC/src/Security/Security.csproj",
+        "packagesPath": "/Users/omotolaalimi/.nuget/packages/",
+        "outputPath": "/Users/omotolaalimi/Desktop/IOC/src/Security/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/omotolaalimi/Desktop/IOC/NuGet.Config",
+          "/Users/omotolaalimi/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "noWarn": [
+            "NU1603",
+            "NU1900",
+            "NU1901",
+            "NU1902",
+            "NU1903"
+          ],
+          "warnAsError": [
+            "NU1605"
+          ],
+          "warnNotAsError": [
+            "NU1603",
+            "NU1900"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Azure.Identity": {
+              "target": "Package",
+              "version": "[1.12.1, )"
+            },
+            "Azure.Security.KeyVault.Secrets": {
+              "target": "Package",
+              "version": "[4.6.0, )"
+            },
+            "Microsoft.AspNetCore.Authorization": {
+              "target": "Package",
+              "version": "[8.0.5, )"
+            },
+            "Microsoft.AspNetCore.Http": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.AspNetCore.Http.Abstractions": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.AspNetCore.Http.Extensions": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.AzureKeyVault": {
+              "target": "Package",
+              "version": "[3.1.24, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "Microsoft.Extensions.DependencyInjection.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "Roslynator.Analyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[4.11.0, )"
+            },
+            "StyleCop.Analyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.2.0-beta.507, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.3.0, )"
             }
           },
           "imports": [

@@ -14,7 +14,7 @@ on:
 env:
   AZURE_RESOURCE_GROUP: rg-deltagrid-dev
   AZURE_LOCATION: westeurope
-  DOTNET_VERSION: '8.0.404'
+  DOTNET_VERSION: '9.0.305'
 
 jobs:
   build:
@@ -250,5 +250,4 @@ jobs:
         run: |
           curl -f https://app-deltagrid-api-dev.azurewebsites.net/health || exit 1
           curl -f https://app-deltagrid-gateway-dev.azurewebsites.net/health || exit 1
-
 

@@ -26,14 +26,34 @@ public static class SecurityExtensions
         IConfiguration configuration)
     {
         var keyVaultUrl = configuration["KeyVault:Url"] 
-            ?? configuration["Azure:KeyVault:Url"]
-            ?? throw new InvalidOperationException("KeyVault:Url must be configured");
-
-        services.AddSingleton<IKeyVaultSecretManager>(sp =>
+            ?? configuration["Azure:KeyVault:Url"];
+        
+        // For test environments, use a mock Key Vault if URL is not configured
+        if (string.IsNullOrEmpty(keyVaultUrl))
         {
-            var logger = sp.GetRequiredService<ILogger<KeyVaultSecretManager>>();
-            return new KeyVaultSecretManager(keyVaultUrl, logger);
-        });
+            var env = configuration["ASPNETCORE_ENVIRONMENT"] ?? configuration["Environment"] ?? "Production";
+            if (env == "Test" || env == "Testing" || env.Contains("Test"))
+            {
+                // Use a test-friendly mock Key Vault manager
+                services.AddSingleton<IKeyVaultSecretManager>(sp =>
+                {
+                    var logger = sp.GetRequiredService<ILogger<TestKeyVaultSecretManager>>();
+                    return new TestKeyVaultSecretManager(logger);
+                });
+            }
+            else
+            {
+                throw new InvalidOperationException("KeyVault:Url must be configured in non-test environments");
+            }
+        }
+        else
+        {
+            services.AddSingleton<IKeyVaultSecretManager>(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<KeyVaultSecretManager>>();
+                return new KeyVaultSecretManager(keyVaultUrl, logger);
+            });
+        }
 
         var jwtIssuer = configuration["JWT:Issuer"] ?? "https://deltagrid.io";
         var jwtAudience = configuration["JWT:Audience"] ?? "deltagrid-api";

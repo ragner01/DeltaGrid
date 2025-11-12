@@ -17,6 +17,7 @@ env:
   AZURE_RESOURCE_GROUP: rg-deltagrid-staging
   AZURE_LOCATION: westeurope
   VERSION: ${{ github.event.inputs.version }}
+  DOTNET_SDK_VERSION: '9.0.305'
 
 jobs:
   approval:
@@ -81,7 +82,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.404'
+          dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
       
       - name: Restore dependencies
         run: dotnet restore IOC.sln
@@ -110,4 +111,3 @@ jobs:
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --slot production \
             --target-slot staging
-

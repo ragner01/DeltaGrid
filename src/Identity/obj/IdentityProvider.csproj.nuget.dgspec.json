@@ -31,9 +31,19 @@
           }
         },
         "warningProperties": {
-          "allWarningsAsErrors": true,
+          "noWarn": [
+            "NU1603",
+            "NU1900",
+            "NU1901",
+            "NU1902",
+            "NU1903"
+          ],
           "warnAsError": [
             "NU1605"
+          ],
+          "warnNotAsError": [
+            "NU1603",
+            "NU1900"
           ]
         },
         "restoreAuditProperties": {
@@ -51,9 +61,18 @@
               "target": "Package",
               "version": "[7.0.5, )"
             },
+            "Duende.IdentityServer.AspNetIdentity": {
+              "target": "Package",
+              "version": "[7.0.5, )"
+            },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.5, )"
+            },
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.InMemory": {
               "target": "Package",

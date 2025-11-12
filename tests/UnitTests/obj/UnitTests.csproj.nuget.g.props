@@ -12,4 +12,17 @@
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <SourceRoot Include="/Users/omotolaalimi/.nuget/packages/" />
   </ItemGroup>
+  <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)xunit.runner.visualstudio/2.5.8/build/net6.0/xunit.runner.visualstudio.props" Condition="Exists('$(NuGetPackageRoot)xunit.runner.visualstudio/2.5.8/build/net6.0/xunit.runner.visualstudio.props')" />
+    <Import Project="$(NuGetPackageRoot)xunit.core/2.7.1/build/xunit.core.props" Condition="Exists('$(NuGetPackageRoot)xunit.core/2.7.1/build/xunit.core.props')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/8.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props" Condition="Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/8.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')" />
+  </ImportGroup>
+  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Pkgxunit_analyzers Condition=" '$(Pkgxunit_analyzers)' == '' ">/Users/omotolaalimi/.nuget/packages/xunit.analyzers/1.12.0</Pkgxunit_analyzers>
+    <PkgMicrosoft_Extensions_ApiDescription_Server Condition=" '$(PkgMicrosoft_Extensions_ApiDescription_Server)' == '' ">/Users/omotolaalimi/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5</PkgMicrosoft_Extensions_ApiDescription_Server>
+    <PkgStyleCop_Analyzers_Unstable Condition=" '$(PkgStyleCop_Analyzers_Unstable)' == '' ">/Users/omotolaalimi/.nuget/packages/stylecop.analyzers.unstable/1.2.0.507</PkgStyleCop_Analyzers_Unstable>
+    <PkgRoslynator_Analyzers Condition=" '$(PkgRoslynator_Analyzers)' == '' ">/Users/omotolaalimi/.nuget/packages/roslynator.analyzers/4.11.0</PkgRoslynator_Analyzers>
+    <PkgMicrosoft_CodeAnalysis_NetAnalyzers Condition=" '$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)' == '' ">/Users/omotolaalimi/.nuget/packages/microsoft.codeanalysis.netanalyzers/8.0.0</PkgMicrosoft_CodeAnalysis_NetAnalyzers>
+    <PkgHangfire_SqlServer Condition=" '$(PkgHangfire_SqlServer)' == '' ">/Users/omotolaalimi/.nuget/packages/hangfire.sqlserver/1.8.16</PkgHangfire_SqlServer>
+  </PropertyGroup>
 </Project>

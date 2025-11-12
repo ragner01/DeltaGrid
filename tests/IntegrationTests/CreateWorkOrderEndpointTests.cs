@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using IOC.Application.Work.CreateWorkOrder;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace IOC.IntegrationTests;
@@ -14,7 +15,18 @@ public class CreateWorkOrderEndpointTests : IClassFixture<WebApplicationFactory<
 
     public CreateWorkOrderEndpointTests(WebApplicationFactory<global::Program> factory)
     {
-        _factory = factory.WithWebHostBuilder(_ => { });
+        _factory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.UseEnvironment("Test");
+            builder.ConfigureAppConfiguration((context, config) =>
+            {
+                config.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["ASPNETCORE_ENVIRONMENT"] = "Test",
+                    ["Environment"] = "Test"
+                });
+            });
+        });
     }
 
     [Fact]
