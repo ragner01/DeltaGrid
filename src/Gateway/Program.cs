@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
@@ -57,31 +58,30 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             RequireExpirationTime = true,
             RequireAudience = true
         };
-        
-        // Get signing key from Key Vault
-        opts.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = async context =>
-            {
-                try
-                {
-                    var keyVault = context.HttpContext.RequestServices
-                        .GetRequiredService<IKeyVaultSecretManager>();
-                    var signingKey = await keyVault.GetSecretAsync(jwtSigningKeyName);
-                    var keyBytes = Convert.FromBase64String(signingKey);
-                    context.TokenValidationParameters.IssuerSigningKey = 
-                        new SymmetricSecurityKey(keyBytes);
-                }
-                catch (Exception ex)
-                {
-                    var logger = context.HttpContext.RequestServices
-                        .GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "Failed to retrieve JWT signing key from Key Vault");
-                    context.Fail("Authentication failed");
-                }
-            }
-        };
     });
+
+// Set signing key from Key Vault during configuration
+builder.Services.AddSingleton<IConfigureOptions<JwtBearerOptions>>(sp =>
+{
+    return new ConfigureNamedOptions<JwtBearerOptions>(
+        JwtBearerDefaults.AuthenticationScheme, 
+        options =>
+        {
+            try
+            {
+                var keyVault = sp.GetRequiredService<IKeyVaultSecretManager>();
+                var signingKey = keyVault.GetSecretAsync(jwtSigningKeyName).Result;
+                var keyBytes = Convert.FromBase64String(signingKey);
+                options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(keyBytes);
+            }
+            catch (Exception ex)
+            {
+                var logger = sp.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "Failed to configure JWT signing key from Key Vault");
+                throw;
+            }
+        });
+});
 
 // Configure Redis for distributed cache (idempotency store)
 var redisConnectionString = builder.Configuration["Redis:ConnectionString"];

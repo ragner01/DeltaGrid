@@ -1,4 +1,5 @@
 using System.Data;
+using System.Security;
 using Microsoft.Extensions.Configuration;
 using Kusto.Data;
 using Kusto.Data.Common;
