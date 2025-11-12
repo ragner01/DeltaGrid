@@ -2,6 +2,7 @@ using IOC.Cutover.Models;
 using IOC.Cutover.Services;
 using IOC.Cutover.Persistence;
 using IOC.Security;
+using IOC.BuildingBlocks.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Metrics;
@@ -13,17 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateIssuerSigningKey = false,
-            ValidateLifetime = true
-        };
-    });
+// Configure security features
+builder.Services.AddRequestSizeLimits();
+builder.Services.AddSecureJwtAuthentication(builder.Configuration);
+builder.Services.AddSecureCors(builder.Configuration);
 
 builder.Services.AddAuthorization(opt =>
 {
@@ -69,14 +63,24 @@ builder.Services.AddSingleton<IHypercareService, HypercareService>();
 
 var app = builder.Build();
 
+// Add security middleware
+app.UseSecurityHeaders();
+app.UseRequestSizeLimit();
 app.UseSerilogRequestLogging();
+app.UseCors("AllowedOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment())
+// Only enable Swagger in development and if explicitly enabled
+if (app.Environment.IsDevelopment() && 
+    builder.Configuration.GetValue<bool>("EnableSwagger", false))
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "IOC Cutover API");
+        options.RoutePrefix = string.Empty;
+    });
 }
 
 var v1 = app.MapGroup("/api/v{version:apiVersion}")

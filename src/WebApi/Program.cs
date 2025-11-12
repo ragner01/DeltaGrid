@@ -30,23 +30,21 @@ using Serilog;
 using System.Diagnostics.Metrics;
 using System.Text;
 using IOC.WebApi.Security;
+using IOC.BuildingBlocks.Security;
 using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateIssuerSigningKey = false,
-            ValidateLifetime = true
-        };
-    });
+// Configure request size limits
+builder.Services.AddRequestSizeLimits();
+
+// Configure secure JWT authentication
+builder.Services.AddSecureJwtAuthentication(builder.Configuration);
+
+// Configure CORS
+builder.Services.AddSecureCors(builder.Configuration);
 
 builder.Services.AddAuthorization(opt =>
 {
@@ -127,9 +125,13 @@ InMemoryWellTestRepository.Seed(new IOC.Core.Domain.Allocation.WellTest("well-a"
 InMemoryWellTestRepository.Seed(new IOC.Core.Domain.Allocation.WellTest("well-b", day, 15, 0, 0));
 InMemoryWellTestRepository.Seed(new IOC.Core.Domain.Allocation.WellTest("well-c", day, 5, 0, 0));
 
+// Add security middleware
+app.UseSecurityHeaders();
+app.UseRequestSizeLimit();
 app.UseSerilogRequestLogging();
 // ProblemDetails (RFC7807) already added via services; ensure middleware enabled
 app.UseProblemDetails();
+app.UseCors("AllowedOrigins");
 
 // PII scrubber for common fields
 app.Use(async (ctx, next) =>
@@ -181,10 +183,16 @@ app.Use(async (ctx, next) =>
     await next();
 });
 
-if (app.Environment.IsDevelopment())
+// Only enable Swagger in development and if explicitly enabled
+if (app.Environment.IsDevelopment() && 
+    builder.Configuration.GetValue<bool>("EnableSwagger", false))
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "IOC Web API");
+        options.RoutePrefix = string.Empty;
+    });
 }
 
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));

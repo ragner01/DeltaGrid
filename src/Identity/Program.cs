@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,10 +53,15 @@ builder.Services.AddIdentityServer()
             AllowOfflineAccess = true
         },
         // Service to service (client credentials)
+        // Note: Secret loaded from Key Vault in production
+        // For development, use environment variable or Key Vault
         new Client
         {
             ClientId = "svc-gateway",
-            ClientSecrets = { new Secret("secret".Sha256()) },
+            ClientSecrets = { new Secret(
+                (builder.Configuration["Identity:GatewayClientSecret"] ?? 
+                 throw new InvalidOperationException("Identity:GatewayClientSecret must be configured"))
+                .Sha256()) },
             AllowedGrantTypes = GrantTypes.ClientCredentials,
             AllowedScopes = { "api" }
         }
@@ -94,8 +100,21 @@ static async Task SeedAsync(IServiceProvider services)
         var u = await userMgr.FindByNameAsync(username);
         if (u is null)
         {
+            // Generate secure random password or require change on first login
+            var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+            var defaultPassword = config["Identity:DefaultPassword"] 
+                ?? throw new InvalidOperationException("Identity:DefaultPassword must be configured for seed users");
+            
             u = new IdentityUser(username) { Email = $"{username}@example.com", EmailConfirmed = true };
-            await userMgr.CreateAsync(u, "Pass123$!");
+            var result = await userMgr.CreateAsync(u, defaultPassword);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException($"Failed to create user {username}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+            
+            // Force password change on first login
+            await userMgr.SetLockoutEnabledAsync(u, false);
+            
             await userMgr.AddToRoleAsync(u, role);
             foreach (var (type, value) in claims)
             {

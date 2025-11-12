@@ -50,20 +50,31 @@ public sealed class KeyVaultSecretManager : IKeyVaultSecretManager
         try
         {
             var secret = await _client.GetSecretAsync(secretName, cancellationToken: ct);
-            _logger.LogInformation("Retrieved secret {SecretName} from Key Vault", secretName);
+            // Mask secret name in logs to prevent information disclosure
+            var maskedName = MaskSensitive(secretName);
+            _logger.LogInformation("Retrieved secret from Key Vault", new { SecretName = maskedName });
             return secret.Value.Value;
         }
         catch (Azure.RequestFailedException ex) when (ex.Status == 404)
         {
-            _logger.LogWarning("Secret {SecretName} not found in Key Vault", secretName);
+            var maskedName = MaskSensitive(secretName);
+            _logger.LogWarning("Secret not found in Key Vault", new { SecretName = maskedName });
             throw new InvalidOperationException($"Secret {secretName} not found", ex);
         }
+    }
+    
+    private static string MaskSensitive(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return "***";
+        if (input.Length <= 4) return "****";
+        return input.Substring(0, 2) + "****" + input.Substring(input.Length - 2);
     }
 
     public async Task SetSecretAsync(string secretName, string secretValue, CancellationToken ct = default)
     {
         await _client.SetSecretAsync(secretName, secretValue, ct);
-        _logger.LogInformation("Set secret {SecretName} in Key Vault", secretName);
+        var maskedName = MaskSensitive(secretName);
+        _logger.LogInformation("Set secret in Key Vault", new { SecretName = maskedName });
     }
 
     public async Task RotateSecretAsync(string secretName, string newValue, CancellationToken ct = default)
@@ -75,7 +86,8 @@ public sealed class KeyVaultSecretManager : IKeyVaultSecretManager
         var versions = await GetSecretVersionsAsync(secretName, ct);
         if (versions.Count > 1)
         {
-            _logger.LogInformation("Secret {SecretName} rotated: {VersionCount} versions exist", secretName, versions.Count);
+            var maskedName = MaskSensitive(secretName);
+            _logger.LogInformation("Secret rotated", new { SecretName = maskedName, VersionCount = versions.Count });
         }
     }
 

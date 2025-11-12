@@ -5,6 +5,7 @@ using IOC.Reporting.Export;
 using IOC.Reporting.Persistence;
 using IOC.Reporting.Scheduling;
 using IOC.Security;
+using IOC.BuildingBlocks.Security;
 using Hangfire;
 using Hangfire.SqlServer;
 using Hangfire.MemoryStorage;
@@ -19,17 +20,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateIssuerSigningKey = false,
-            ValidateLifetime = true
-        };
-    });
+// Configure security features
+builder.Services.AddRequestSizeLimits();
+builder.Services.AddSecureJwtAuthentication(builder.Configuration);
+builder.Services.AddSecureCors(builder.Configuration);
 
 builder.Services.AddAuthorization(opt =>
 {
@@ -81,15 +75,24 @@ builder.Services.AddSingleton<IReportScheduler, HangfireReportScheduler>();
 
 var app = builder.Build();
 
+// Add security middleware
+app.UseSecurityHeaders();
+app.UseRequestSizeLimit();
 app.UseSerilogRequestLogging();
+app.UseCors("AllowedOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Hangfire dashboard (restrict to admin in production)
-if (app.Environment.IsDevelopment())
+// Only enable Swagger in development and if explicitly enabled
+if (app.Environment.IsDevelopment() && 
+    builder.Configuration.GetValue<bool>("EnableSwagger", false))
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "IOC Reporting API");
+        options.RoutePrefix = string.Empty;
+    });
     app.UseHangfireDashboard("/hangfire");
 }
 

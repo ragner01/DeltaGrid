@@ -46,34 +46,39 @@ public sealed class AzureSearchService : ISearchService
 
         if (!string.IsNullOrEmpty(query.TenantId))
         {
-            filters.Add($"tenantId eq '{query.TenantId}'");
+            var escapedTenantId = EscapeODataString(query.TenantId);
+            filters.Add($"tenantId eq '{escapedTenantId}'");
         }
 
         if (query.RequiredRoles != null && query.RequiredRoles.Any())
         {
             // User must have at least one required role
-            var roleFilters = query.RequiredRoles.Select(r => $"roles/any(role: role eq '{r}')");
+            var roleFilters = query.RequiredRoles
+                .Select(r => $"roles/any(role: role eq '{EscapeODataString(r)}')");
             filters.Add($"({string.Join(" or ", roleFilters)})");
         }
 
         if (!string.IsNullOrEmpty(query.SiteId))
         {
-            filters.Add($"(siteId eq '{query.SiteId}' or siteId eq '')");
+            var escapedSiteId = EscapeODataString(query.SiteId);
+            filters.Add($"(siteId eq '{escapedSiteId}' or siteId eq '')");
         }
 
         if (!string.IsNullOrEmpty(query.AssetId))
         {
-            filters.Add($"(assetId eq '{query.AssetId}' or assetId eq '')");
+            var escapedAssetId = EscapeODataString(query.AssetId);
+            filters.Add($"(assetId eq '{escapedAssetId}' or assetId eq '')");
         }
 
         if (query.TypeFilter.HasValue)
         {
-            filters.Add($"type eq '{query.TypeFilter.Value}'");
+            var escapedType = EscapeODataString(query.TypeFilter.Value.ToString());
+            filters.Add($"type eq '{escapedType}'");
         }
 
         if (query.Tags != null && query.Tags.Any())
         {
-            var tagFilters = query.Tags.Select(t => $"tags/any(tag: tag eq '{t}')");
+            var tagFilters = query.Tags.Select(t => $"tags/any(tag: tag eq '{EscapeODataString(t)}')");
             filters.Add($"({string.Join(" or ", tagFilters)})");
         }
 
@@ -214,6 +219,23 @@ public sealed class AzureSearchService : ISearchService
             $"How do I handle {question}?",
             $"Where can I find documentation on {question}?"
         };
+    }
+
+    /// <summary>
+    /// Escape OData filter string to prevent injection attacks
+    /// </summary>
+    private static string EscapeODataString(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return string.Empty;
+        
+        // Escape special OData characters
+        return input
+            .Replace("'", "''")      // Single quote escape
+            .Replace("\\", "\\\\")   // Backslash escape
+            .Replace("/", "\\/")     // Forward slash escape
+            .Replace("?", "\\?")     // Question mark escape
+            .Replace("#", "\\#")     // Hash escape
+            .Replace("&", "\\&");    // Ampersand escape
     }
 }
 

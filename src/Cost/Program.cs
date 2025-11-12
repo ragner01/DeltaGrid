@@ -1,3 +1,4 @@
+using IOC.BuildingBlocks.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Trace;
@@ -8,17 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
-    {
-        o.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateIssuerSigningKey = false,
-            ValidateLifetime = true,
-        };
-    });
+// Configure security features
+builder.Services.AddRequestSizeLimits();
+builder.Services.AddSecureJwtAuthentication(builder.Configuration);
+builder.Services.AddSecureCors(builder.Configuration);
 
 builder.Services.AddAuthorization();
 
@@ -35,14 +29,24 @@ builder.Services.AddSingleton<IOC.Cost.AllocationEngine>();
 
 var app = builder.Build();
 
+// Add security middleware
+app.UseSecurityHeaders();
+app.UseRequestSizeLimit();
 app.UseSerilogRequestLogging();
+app.UseCors("AllowedOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment())
+// Only enable Swagger in development and if explicitly enabled
+if (app.Environment.IsDevelopment() && 
+    builder.Configuration.GetValue<bool>("EnableSwagger", false))
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "IOC Cost API");
+        options.RoutePrefix = string.Empty;
+    });
 }
 
 // Ingest WO/materials/labor

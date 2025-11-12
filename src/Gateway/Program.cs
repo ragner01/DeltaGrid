@@ -4,39 +4,115 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.Extensions.Http;
 using Serilog;
 using Yarp.ReverseProxy.Configuration;
+using IOC.Security.Jwt;
+using IOC.Security.KeyVault;
+using IOC.BuildingBlocks.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
+
+// Configure Key Vault Secret Manager
+var keyVaultUrl = builder.Configuration["KeyVault:Url"] 
+    ?? builder.Configuration["Azure:KeyVault:Url"]
+    ?? throw new InvalidOperationException("KeyVault:Url must be configured");
+
+builder.Services.AddSingleton<IKeyVaultSecretManager>(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<KeyVaultSecretManager>>();
+    return new KeyVaultSecretManager(keyVaultUrl, logger);
+});
+
+// Configure JWT validation with proper security
+var jwtIssuer = builder.Configuration["JWT:Issuer"] ?? "https://deltagrid.io";
+var jwtAudience = builder.Configuration["JWT:Audience"] ?? "deltagrid-api";
+var jwtSigningKeyName = builder.Configuration["JWT:SigningKeyName"] ?? "jwt-signing-key";
+
+builder.Services.AddSingleton<IJwtValidator>(sp =>
+{
+    var keyVault = sp.GetRequiredService<IKeyVaultSecretManager>();
+    var logger = sp.GetRequiredService<ILogger<JwtValidator>>();
+    return new JwtValidator(keyVault, jwtIssuer, jwtAudience, jwtSigningKeyName, logger);
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opts =>
     {
         opts.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateIssuerSigningKey = false,
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
             ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.Zero,
+            RequireSignedTokens = true,
+            RequireExpirationTime = true,
+            RequireAudience = true
+        };
+        
+        // Get signing key from Key Vault
+        opts.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = async context =>
+            {
+                try
+                {
+                    var keyVault = context.HttpContext.RequestServices
+                        .GetRequiredService<IKeyVaultSecretManager>();
+                    var signingKey = await keyVault.GetSecretAsync(jwtSigningKeyName);
+                    var keyBytes = Convert.FromBase64String(signingKey);
+                    context.TokenValidationParameters.IssuerSigningKey = 
+                        new SymmetricSecurityKey(keyBytes);
+                }
+                catch (Exception ex)
+                {
+                    var logger = context.HttpContext.RequestServices
+                        .GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Failed to retrieve JWT signing key from Key Vault");
+                    context.Fail("Authentication failed");
+                }
+            }
         };
     });
+
+// Configure Redis for distributed cache (idempotency store)
+var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
+if (!string.IsNullOrEmpty(redisConnectionString))
+{
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnectionString;
+        options.InstanceName = "IOC:";
+    });
+}
+else
+{
+    // Fallback to in-memory cache for development
+    builder.Services.AddDistributedMemoryCache();
+}
 
 builder.Services.AddRateLimiter(o =>
 {
     o.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
     {
         var tenant = ctx.User?.FindFirst("tenant_id")?.Value ?? "anonymous";
-        return RateLimitPartition.GetFixedWindowLimiter(tenant, _ => new FixedWindowRateLimiterOptions
+        // Improved rate limiting: 100 requests per second with burst allowance
+        return RateLimitPartition.GetTokenBucketLimiter(tenant, _ => new TokenBucketRateLimiterOptions
         {
-            PermitLimit = 200,
-            Window = TimeSpan.FromSeconds(1),
-            QueueLimit = 0,
+            TokenLimit = 100,
+            ReplenishmentPeriod = TimeSpan.FromSeconds(1),
+            TokensPerPeriod = 20,
             AutoReplenishment = true,
+            QueueLimit = 50,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
         });
     });
 });
@@ -92,13 +168,10 @@ var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 
-app.Use(async (ctx, next) =>
-{
-    ctx.Response.Headers["Content-Security-Policy"] = "default-src 'self'";
-    await next();
-});
+// Add security headers
+app.UseSecurityHeaders();
 
-// Correlation ID + Idempotency middleware
+// Correlation ID middleware
 app.Use(async (ctx, next) =>
 {
     var corr = ctx.Request.Headers["X-Correlation-ID"].FirstOrDefault() ?? Guid.NewGuid().ToString();
@@ -106,24 +179,46 @@ app.Use(async (ctx, next) =>
     await next();
 });
 
-var idempotencyStore = new Dictionary<string, DateTimeOffset>();
+// Idempotency middleware using distributed cache
 app.Use(async (ctx, next) =>
 {
-    if (string.Equals(ctx.Request.Method, "POST", StringComparison.OrdinalIgnoreCase))
+    if (string.Equals(ctx.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(ctx.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(ctx.Request.Method, "PATCH", StringComparison.OrdinalIgnoreCase))
     {
+        var cache = ctx.RequestServices.GetRequiredService<IDistributedCache>();
         var key = ctx.Request.Headers["Idempotency-Key"].FirstOrDefault();
+        
         if (!string.IsNullOrWhiteSpace(key))
         {
-            if (idempotencyStore.ContainsKey(key))
+            // Limit key length to prevent abuse
+            if (key.Length > 256)
             {
-                ctx.Response.StatusCode = 409;
-                await ctx.Response.WriteAsync("duplicate");
+                ctx.Response.StatusCode = 400;
+                ctx.Response.ContentType = "application/json";
+                await ctx.Response.WriteAsync("{\"error\":\"Idempotency-Key too long\"}");
                 return;
             }
-
-            idempotencyStore[key] = DateTimeOffset.UtcNow;
+            
+            var cacheKey = $"idempotency:{key}";
+            var existing = await cache.GetStringAsync(cacheKey);
+            
+            if (existing != null)
+            {
+                ctx.Response.StatusCode = 409;
+                ctx.Response.ContentType = "application/json";
+                await ctx.Response.WriteAsync("{\"error\":\"Duplicate request\"}");
+                return;
+            }
+            
+            // Store for 24 hours
+            await cache.SetStringAsync(cacheKey, "processed", new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24)
+            });
         }
     }
+    
     await next();
 });
 
